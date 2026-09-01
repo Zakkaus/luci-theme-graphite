@@ -8,7 +8,7 @@
 # Graphite
 
 **OpenWrt 的 LuCI 主题**，包名 `luci-theme-graphite`。<br>
-层级使用灰阶，色相表示状态。
+洗尽铅华。
 
 [English](README.md) · 简体中文 · [繁體中文](README.zh-TW.md)
 

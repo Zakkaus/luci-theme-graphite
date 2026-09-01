@@ -7,9 +7,7 @@
 
 # Graphite
 
-**A LuCI theme for OpenWrt**, packaged as `luci-theme-graphite`.<br>
-Grey carries hierarchy; hue is reserved for status, so on a page listing forty
-interfaces the coloured row is the one that needs attention.
+**A LuCI theme for OpenWrt**, packaged as `luci-theme-graphite`.
 
 English · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
 
