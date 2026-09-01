@@ -264,6 +264,56 @@ button:disabled, .cbi-button:disabled,
 #view > .spinning {
   padding-inline: calc(var(--sp-4) + var(--hairline));
 }
+/* A title row with actions beside it — the channel analysis page puts its
+   refresh button here. The list above reaches the heading inside it and
+   nothing else, so the heading took the page inset and the button next to it
+   did not, leaving the button one inset further out than the title it belongs
+   to. The row takes the inset and the heading gives its own back. */
+.shell-content .cbi-title-section:not(.cbi-section *) {
+  padding-inline: calc(var(--sp-4) + var(--hairline));
+}
+/* The two :not() arms are not decoration. The page-inset rule near the top of
+   this file carries them, which puts it at a higher specificity than a plain
+   descendant selector, so a shorter form here lost and the heading took the
+   inset twice — once from that rule and once from the row around it. */
+.shell-content .cbi-title-section :is(h1, h2, h3):not(.cbi-section *):not(.cbi-page-actions *) {
+  padding-inline: 0;
+}
+
+/* The graph frame, written into the markup by the realtime and channel views:
+   a black border on a white fill, from before LuCI had a theme to ask. On a
+   dark ground it is a white slab with a hard edge, and at full width with no
+   card around it there is nothing holding it to the page.
+
+   This is the one place the theme overrides an inline style. The zone colours
+   and the legend rules stay because they carry meaning the graph needs; a
+   border colour and a page-coloured fill carry none. Matched on the declared
+   border so the rule finds the frame in both the old views and the current
+   ones, which still write the same string. */
+#view div[style*="border:1px solid #000"] {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg);
+  background: var(--card) !important;
+  overflow: hidden;
+}
+/* Where a card already frames the graph — the current views put it in one —
+   the frame would be a second border a few pixels inside the first. It keeps
+   the fill and gives up the edge; the card is the boundary. The older views
+   this rule exists for emit no card, and there the frame is the only thing
+   holding the graph to the page. */
+#view .cbi-section div[style*="border:1px solid #000"] {
+  border-color: transparent !important;
+  border-radius: 0;
+}
+/* With no card around it the frame is the only thing on the page that has not
+   been given the content inset, so it ran wider than the title, the tabs and
+   the table beneath it by one inset at each end. The width is declared inline
+   as 100%, which would then overflow by both margins; auto fills what is left
+   after them instead. */
+#view div[style*="border:1px solid #000"]:not(.cbi-section *) {
+  margin-inline: calc(var(--sp-4) + var(--hairline));
+  inline-size: auto !important;
+}
 
 /* ── Feedback ───────────────────────────────────────────────── */
 
@@ -421,8 +471,13 @@ body.modal-overlay-active #modal_overlay { visibility: visible; opacity: 1; }
   box-shadow: var(--elev-3);
 }
 
-/* An alert nested inside a dialog drops its own fill — the dialog is already
-   the surface.
+/* An alert nested inside a dialog drops its own fill and its edges — the
+   dialog is already the surface. The spine goes with them: with no fill
+   behind it, a 3px stripe standing beside a title that starts flush reads as
+   a stray mark rather than as the edge of anything, and the text it pushes
+   inward looks knocked out of line with the title above. The icon stays; it
+   is what tells the state apart for a reader who cannot separate amber from
+   red, and the dialog's own title says the rest.
 
    The child combinator is load-bearing. ui.js displayStatus() does not nest
    an alert; it puts the alert classes on the dialog node itself, so the
@@ -433,8 +488,7 @@ body.modal-overlay-active #modal_overlay { visibility: visible; opacity: 1; }
   background: none;
   box-shadow: none;
   padding-inline: 0;
-  border-block: 0;
-  border-inline-end: 0;
+  border: 0;
 }
 
 /* The dialog wearing the alert classes stays opaque and takes the status only
