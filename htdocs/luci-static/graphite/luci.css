@@ -204,6 +204,17 @@ button:disabled, .cbi-button:disabled,
 }
 .shell-content h1,
 .shell-content h2 { font-size: var(--text-xl); }
+/* The page title names the page rather than sitting in it, so it starts on
+   the card's own edge instead of on the column the card's contents keep.
+   Only the title: the description under it, the tab row and everything below
+   stay where they are.
+
+   The two :not() arms carry no exclusion of their own — they are there to
+   match the weight of the inset rule further down, which has them, and which
+   otherwise wins the tie and leaves the title where it was. */
+.shell-content .shell-inner h2:not(.cbi-section *):not(.cbi-page-actions *) {
+  padding-inline: 0;
+}
 .shell-content h3 { font-size: var(--text-lg); }
 .shell-content h4,
 .shell-content h5 { font-size: var(--text-base); }
@@ -233,6 +244,16 @@ button:disabled, .cbi-button:disabled,
    below them moved. A card's own headings are excluded because the card
    already supplies this inset as padding. */
 .shell-content :is(h1, h2, h3, .cbi-map-descr, .cbi-section-descr, .cbi-value, .tabs, .cbi-tabmenu):not(.cbi-section *):not(.cbi-page-actions *) {
+  padding-inline: calc(var(--sp-4) + var(--hairline));
+}
+/* The routes page writes its description as a bare <p> under the view node
+   rather than as a .cbi-map-descr, so the list above does not reach it.
+
+   It gets its own rule instead of joining that list: :is() takes the weight
+   of its heaviest argument, and #view carries an id, so putting it in there
+   raised the whole selector to id specificity and silently outranked every
+   override written against it — the tab row's, among others. */
+.shell-content #view > p {
   padding-inline: calc(var(--sp-4) + var(--hairline));
 }
 /* The log views are the exception the list above cannot cover. They render a
@@ -314,6 +335,12 @@ button:disabled, .cbi-button:disabled,
   margin-inline: calc(var(--sp-4) + var(--hairline));
   inline-size: auto !important;
 }
+
+/* shell.css gives the content area a 24px gutter on all four sides. The
+   vertical value is right; the horizontal one puts the card frame 24px off
+   the sidebar and the text inside it 41px, which reads as the page having
+   been pushed away from its own navigation. Only the inline half changes. */
+.shell-content { padding-inline: var(--sp-4); }
 
 /* ── Feedback ───────────────────────────────────────────────── */
 
@@ -1768,8 +1795,8 @@ input[type="text"], input[type="password"], input[type="number"] {
    a four-character Chinese status broke into four lines — Chinese wraps
    between any two characters, so there is no width at which it gives up and
    overflows instead. */
-.cbi-section > div:has(> .table),
-.cbi-section-node > div:has(> .table),
+.cbi-section > div:not(.cbi-section-node):has(> .table),
+.cbi-section-node > div:not(.cbi-section-node):has(> .table),
 .shell-inner > div:has(> .table) { overflow-x: auto; }
 
 /* CBI's TableSection writes the table straight into the section, so there is
@@ -1800,13 +1827,58 @@ input[type="text"], input[type="password"], input[type="number"] {
    shape a <div> is. Naming both the node and the table matched twice on the LXC
    page and bled 32px, putting the table outside the card.
 
+   The node is not one of those wrapper <div>s. Treating it as one is what the
+   mounts page caught: it is a plain div holding a table, so it matched, and the
+   bleed pulled the whole group out — its own heading and every form label with
+   it, one inset left of the card heading above them. The table inside it is
+   named instead.
+
    The card's own padding cannot be dropped instead — passwall, dhcp and dns put
    form rows and a table inside one card and those rows need it. Nor does any of
    this apply to a table inside a form row: dhcp nests a whole .cbi-tblsection in
    a .cbi-value's field, and that one is already indented by the row it sits in. */
 .cbi-section > .table:not(.cbi-value *),
-.cbi-section > div:has(> .table:not(.cbi-value *)),
-.cbi-section-node > div:has(> .table:not(.cbi-value *)) {
+.cbi-section > div:not(.cbi-section-node):has(> .table:not(.cbi-value *)),
+.cbi-section-node > div:not(.cbi-section-node):has(> .table:not(.cbi-value *)),
+.cbi-section > .cbi-section-node > .table:not(.cbi-value *) {
+  margin-inline: calc(var(--sp-4) * -1);
+}
+
+/* Everything that shares the bled wrapper with its table. The overview page
+   puts a panel's heading, its interface boxes and its table in one <div>, and
+   that div is the scroller, so the bleed lands on it and carries all three
+   out — the heading sixteen pixels left of every other card heading, the
+   interface box flush against the card's inner edge with nothing between them.
+
+   Only the table wants the bleed, so the wrapper takes its inset back and the
+   table alone gives it up again. Done on the wrapper rather than on each
+   child: a rule per child would put a left margin on every interface box in a
+   row of them, and the ports panel is a row of them. */
+.cbi-section > div:not(.cbi-value):not(.cbi-section-node):has(> .table),
+.cbi-section-node > div:not(.cbi-value):not(.cbi-section-node):has(> .table) {
+  padding-inline: var(--sp-4);
+}
+.cbi-section > div:not(.cbi-value):not(.cbi-section-node):has(> .table) > .table,
+.cbi-section-node > div:not(.cbi-value):not(.cbi-section-node):has(> .table) > .table {
+  margin-inline: calc(var(--sp-4) * -1);
+}
+/* A form row and a section node are not wrappers of that kind. Treating them
+   as such gave each a padding and the table inside it a matching bleed, and
+   the two cancelled: the header text stayed one cell padding inside the
+   column — on the DHCP page, which puts a table in a row, and on lxccm, which
+   puts one under a node. Both keep their own geometry; the table gives up the
+   cell padding on its own. */
+.cbi-value > .table {
+  margin-inline: calc(var(--sp-4) * -1);
+}
+
+/* A whole table section nested inside a form row — the DHCP page puts static
+   leases there, lxccm does the same. The bleed above excludes anything under
+   .cbi-value, which is right for a table belonging to one field and wrong for
+   this: it is a section that happens to sit in a row, and without the bleed
+   its header text lands one cell padding inside the description above it in
+   the same card. */
+.cbi-value > .cbi-section.cbi-tblsection > .table {
   margin-inline: calc(var(--sp-4) * -1);
 }
 
@@ -1943,7 +2015,17 @@ input[type="text"], input[type="password"], input[type="number"] {
   font-weight: 600;
   text-align: center;
 }
-.ifacebox-body { padding: var(--sp-3); font-size: var(--text-xs); text-align: center; }
+/* Two different things wear this class. The port cards are narrow and hold a
+   label over a counter, and centring is what makes them read as a row of
+   chips. The overview's upstream panel is wide and holds label-and-value
+   pairs, and centring those leaves every value starting at a different place
+   with a ragged edge down both sides.
+
+   The port cards are the ones luci-mod-status gives an inline max-width, so
+   that is the discriminator — the same inline style the rule below overrides
+   for its width. */
+.ifacebox-body { padding: var(--sp-3); font-size: var(--text-xs); text-align: start; }
+.shell-content .ifacebox[style*="max-width"] .ifacebox-body { text-align: center; }
 /* luci-mod-status writes style="min-width:70px; max-width:100px" onto a port
    card whose longest line is a traffic counter — "▲ 176.9 MiB" — which does
    not fit in 100px at this type scale. This inline style contradicts its own
