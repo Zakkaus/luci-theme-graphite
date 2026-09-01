@@ -1,0 +1,307 @@
+/* ─────────────────────────────────────────────────────────────
+   Token layer — application UI
+   Framework-free. Drop it in, then reference the variables.
+
+   Every value is defined once on bare :root. Dark redefines only the
+   values, never a component rule, and it is defined twice on purpose:
+   under prefers-color-scheme for the default "follow the system", and
+   under [data-theme] so an explicit toggle wins in both directions. A
+   colour whose only definition lives inside a media query has no value
+   for a viewer whose theme is set the other way.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* Status pairs, so a component reads one name instead of repeating the
+     lightness and chroma that make a fill legible under its own text. */
+  --status-ok-bg:      oklch(0.45 0.12 var(--h-ok) / 12%); --status-ok-fg:      oklch(0.40 0.12 var(--h-ok));
+  --status-info-bg:    oklch(0.45 0.10 var(--h-info) / 12%); --status-info-fg:    oklch(0.40 0.10 var(--h-info));
+  --status-pending-bg: oklch(0.55 0.12 var(--h-warn) / 12%); --status-pending-fg: oklch(0.45 0.12 var(--h-warn));
+  --status-error-bg:   oklch(0.53 0.18 var(--h-bad) / 12%); --status-error-fg:   oklch(0.45 0.18 var(--h-bad));
+  --status-neutral-bg: oklch(0.55 0    0 / 12%);   --status-neutral-fg: oklch(0.40 var(--tint-c) var(--tint-h));
+
+  /* Native controls — select popups, checkboxes, scrollbars — are painted by
+     the browser, not by this sheet. color-scheme is the only way to tell it
+     which way to paint them, and without it a dark page shows white dropdowns
+     and white scrollbars beside black surfaces. */
+  color-scheme: light;
+
+  /* Palette seeds. The neutral ramp is achromatic by default, which is a choice
+     rather than an absence: set --tint-c to something small and --tint-h to a
+     hue, and every surface picks up the same bias without a single value being
+     rewritten. A grey with a slight bias toward the accent reads as chosen; a
+     pure grey reads as inherited.
+         A cool product would set --tint-h: 250 and --tint-c: 0.006.
+     The four semantic hues are named here too, so a project that must move one
+     of them moves one number instead of hunting eight literals. */
+  --tint-h: 0;
+  --tint-c: 0;
+  --h-ok: 155;
+  --h-warn: 75;
+  --h-info: 250;
+  --h-bad: 25;
+
+  /* Elevation is a token because it cannot mean the same thing in both themes.
+     Light casts a black shadow. Dark cannot: a black shadow on a near-black
+     ground is invisible, which is how a dark theme turns into one flat mass.
+     Dark raises the surface and draws a light ring instead. */
+  --elev-1: 0 1px 3px -1px oklch(0 0 0 / 4%), 0 1px 2px -1px oklch(0 0 0 / 3%);
+  --elev-2: 0 4px 16px -4px oklch(0 0 0 / 8%), 0 2px 4px -2px oklch(0 0 0 / 4%);
+  --elev-press: 0 4px 12px -4px oklch(0 0 0 / 10%);
+  /* The focus ring is a shadow, and --ring is a colour. They shared a name,
+     so the colour won by being declared later and box-shadow: var(--ring)
+     resolved to a bare colour — not a valid shadow, so the declaration was
+     dropped and inputs had no focus ring at all. Two things, two names. */
+  --focus-ring: 0 0 0 2px oklch(0.10 0 0 / 8%);
+
+  /* Surfaces, light. Achromatic: chroma is 0 on every one of them.
+     Colour enters this system only through status, never through
+     brand — see the status classes below. */
+  --background: oklch(0.985 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.07 var(--tint-c) var(--tint-h));
+  --card: oklch(1 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.07 var(--tint-c) var(--tint-h));
+  --popover: oklch(1 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.07 var(--tint-c) var(--tint-h));
+
+  --primary: oklch(0.10 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.99 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.955 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.10 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.955 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.40 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.94 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.10 var(--tint-c) var(--tint-h));
+
+  /* The one chromatic token. Everything else that needs colour is a
+     status, and statuses live in their own layer. */
+  --destructive: oklch(0.53 0.22 var(--h-bad));
+
+  --border: oklch(0.85 var(--tint-c) var(--tint-h));
+  --input: oklch(0.85 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.10 var(--tint-c) var(--tint-h));
+
+  /* A raised surface for a block nested inside a card, where a border
+     would be one line too many. */
+  --surface-raised: oklch(0.97 var(--tint-c) var(--tint-h));
+
+  /* One seed, one ladder. A literal border-radius anywhere else is the
+     violation — the names carry the intent, the numbers do not. */
+  --radius: 0.625rem;
+  --radius-xs: calc(var(--radius) * 0.3);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --card-shadow: var(--elev-1);
+  --scrim: oklch(0 0 0 / 40%);
+  --radius-full: 9999px;   /* 胶囊。唯一不从种子推导的一档：它要的是「尽可能圆」，
+                              不是种子的某个倍数。改种子不该让胶囊变成圆角矩形。
+                              以前这一档不存在，于是被手写了 20 次，还分成
+                              999px 和 9999px 两种写法。 */
+
+  /* Spacing. One seed, one ladder, same shape as the radius scale.
+     Before this existed the stylesheet carried 25 different literal spacing
+     values, which is why nothing lined up and everything read as cramped. */
+  --sp: 0.5rem;
+  --sp-1: calc(var(--sp) * 0.5);
+  --sp-2: var(--sp);
+  --sp-3: calc(var(--sp) * 1.5);
+  --sp-4: calc(var(--sp) * 2);
+  --sp-5: calc(var(--sp) * 3);
+  --sp-6: calc(var(--sp) * 4);
+  --sp-7: calc(var(--sp) * 6);
+  --sp-8: calc(var(--sp) * 8);
+
+  /* Hairline. Not a spacing step: it is the border width, and anything that has
+     to cancel a border must be derived from it rather than repeat the literal. */
+  --hairline: 1px;
+
+  /* Scrollbar. Chrome, not content: visible enough to grab, quiet enough to
+     stop being the brightest thing on a dark screen. */
+  --scrollbar-thumb: oklch(0.5 0 0 / 22%);
+  --scrollbar-thumb-hover: oklch(0.4 0 0 / 38%);
+
+
+  /* Page scale. Without a step here the page's own top and bottom padding has
+     nothing to land on, which is why two example pages expressed the same
+     intent as 3rem/6rem and 2.5rem/5rem — the inconsistency was the missing
+     step, not a wrong choice. */
+  --sp-9: calc(var(--sp) * 12);
+
+  /* The smallest a touch target may be, in any direction. A control may look
+     smaller than this — a switch, an icon button — but what a finger has to
+     hit may not. Measured on a real page under an emulated coarse pointer:
+     before this existed the switch was 36x20 and the icon button 32x32. */
+  --tap-min: 2.75rem;
+
+  /* One width for every field that is not a full-width input, so a native
+     select and a custom one do not come out 102px and 210px side by side. */
+  --field-w: 13rem;
+
+
+  /* Control heights. A control shorter than this cannot hold its own padding. */
+  /* The height a control renders at, declared rather than floored. These are the
+     values the library actually rendered before the height was declared: 40 and 48
+     were the minimums, and padding plus a 16px line pushed both two pixels past
+     them. Declaring the minimum made every control two pixels shorter than the
+     page it came from — the equal-height fix was right, the number was the old
+     floor rather than the old result. `--control-h-sm` needs no change: at 14px
+     and 8px padding it computed to exactly its own floor. */
+  --control-h: 2.625rem;
+  --control-h-sm: 2rem;
+  --control-h-lg: 3.125rem;
+
+
+
+  /* Charts. Series colour is greyscale so a chart introduces no new hue.
+     --fill-* exist because a text colour is not a fill colour: the badge
+     values are tuned as dark text on a pale ground, and the same value across
+     a large area reads muddy. These are lighter and less saturated. */
+  --chart-1: oklch(0.72 var(--tint-c) var(--tint-h));
+  --chart-2: oklch(0.62 var(--tint-c) var(--tint-h));
+  --chart-3: oklch(0.52 var(--tint-c) var(--tint-h));
+  --chart-4: oklch(0.42 var(--tint-c) var(--tint-h));
+  --chart-5: oklch(0.32 var(--tint-c) var(--tint-h));
+  --fill-ok:   oklch(0.68 0.10 var(--h-ok));
+  --fill-warn: oklch(0.78 0.10 var(--h-warn));
+  --fill-info: oklch(0.68 0.09 var(--h-info));
+  --fill-bad:  oklch(0.66 0.14 var(--h-bad));
+
+
+  /* One entrance curve for the whole system. Using a second easing is
+     a decision, not a default. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-press: 0.15s;
+  --dur-hover: 0.2s;
+  --dur-surface: 0.25s;
+  --dur-enter: 0.35s;
+  --dur-enter-lg: 0.4s;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    "Noto Sans SC", "PingFang SC", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Dark. Three surfaces form a visible ladder — background, card,
+   popover at 0.06 / 0.125 / 0.165 — so a popover over a card over the
+   page reads as three depths. The obvious first attempt, 0.07 / 0.13 /
+   0.14, collapses the top two into one muddy step; the numbers below
+   are the corrected ones. Border is pulled darker so a card edge stays
+   legible against the lighter card fill. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  --status-ok-bg:      oklch(0.55 0.12 var(--h-ok) / 15%); --status-ok-fg:      oklch(0.80 0.12 var(--h-ok));
+  --status-info-bg:    oklch(0.55 0.10 var(--h-info) / 15%); --status-info-fg:    oklch(0.81 0.10 var(--h-info));
+  --status-pending-bg: oklch(0.60 0.12 var(--h-warn) / 15%); --status-pending-fg: oklch(0.82 0.12 var(--h-warn));
+  --status-error-bg:   oklch(0.58 0.18 var(--h-bad) / 15%); --status-error-fg:   oklch(0.89 0.18 var(--h-bad));
+  --status-neutral-bg: oklch(0.60 0    0 / 15%);   --status-neutral-fg: oklch(0.82 var(--tint-c) var(--tint-h));
+
+  --scrollbar-thumb: oklch(1 0 0 / 14%);
+  --scrollbar-thumb-hover: oklch(1 0 0 / 26%);
+
+    color-scheme: dark;
+
+  --elev-1: inset 0 1px 0 oklch(1 0 0 / 9%);
+  --elev-2: inset 0 1px 0 oklch(1 0 0 / 14%), 0 8px 24px -8px oklch(0 0 0 / 65%);
+  --elev-press: inset 0 1px 0 oklch(1 0 0 / 9%);
+  --focus-ring: 0 0 0 2px oklch(1 0 0 / 18%);
+
+  --chart-1: oklch(0.42 var(--tint-c) var(--tint-h));
+  --chart-2: oklch(0.52 var(--tint-c) var(--tint-h));
+  --chart-3: oklch(0.62 var(--tint-c) var(--tint-h));
+  --chart-4: oklch(0.72 var(--tint-c) var(--tint-h));
+  --chart-5: oklch(0.82 var(--tint-c) var(--tint-h));
+  --fill-ok:   oklch(0.60 0.10 var(--h-ok));
+  --fill-warn: oklch(0.66 0.10 var(--h-warn));
+  --fill-info: oklch(0.60 0.09 var(--h-info));
+  --fill-bad:  oklch(0.58 0.14 var(--h-bad));
+
+    --background: oklch(0.06 var(--tint-c) var(--tint-h));
+    --foreground: oklch(0.95 var(--tint-c) var(--tint-h));
+    --card: oklch(0.125 var(--tint-c) var(--tint-h));
+    --card-foreground: oklch(0.95 var(--tint-c) var(--tint-h));
+    --popover: oklch(0.165 var(--tint-c) var(--tint-h));
+    --popover-foreground: oklch(0.95 var(--tint-c) var(--tint-h));
+    --primary: oklch(0.95 var(--tint-c) var(--tint-h));
+    --primary-foreground: oklch(0.07 var(--tint-c) var(--tint-h));
+    --secondary: oklch(0.185 var(--tint-c) var(--tint-h));
+    --secondary-foreground: oklch(0.95 var(--tint-c) var(--tint-h));
+    --muted: oklch(0.195 var(--tint-c) var(--tint-h));
+    --muted-foreground: oklch(0.64 var(--tint-c) var(--tint-h));
+    --accent: oklch(0.26 var(--tint-c) var(--tint-h));
+    --accent-foreground: oklch(0.985 var(--tint-c) var(--tint-h));
+    --destructive: oklch(0.78 0.19 var(--h-bad));
+    --border: oklch(0.36 var(--tint-c) var(--tint-h));
+    --input: oklch(0.34 var(--tint-c) var(--tint-h));
+    --ring: oklch(0.95 var(--tint-c) var(--tint-h));
+    --surface-raised: oklch(0.165 var(--tint-c) var(--tint-h));
+    --card-shadow: var(--elev-2);
+    --scrim: oklch(0 0 0 / 60%);
+  }
+}
+
+:root[data-theme="dark"] {
+  --status-ok-bg:      oklch(0.55 0.12 var(--h-ok) / 15%); --status-ok-fg:      oklch(0.80 0.12 var(--h-ok));
+  --status-info-bg:    oklch(0.55 0.10 var(--h-info) / 15%); --status-info-fg:    oklch(0.81 0.10 var(--h-info));
+  --status-pending-bg: oklch(0.60 0.12 var(--h-warn) / 15%); --status-pending-fg: oklch(0.82 0.12 var(--h-warn));
+  --status-error-bg:   oklch(0.58 0.18 var(--h-bad) / 15%); --status-error-fg:   oklch(0.89 0.18 var(--h-bad));
+  --status-neutral-bg: oklch(0.60 0    0 / 15%);   --status-neutral-fg: oklch(0.82 var(--tint-c) var(--tint-h));
+
+  --scrollbar-thumb: oklch(1 0 0 / 14%);
+  --scrollbar-thumb-hover: oklch(1 0 0 / 26%);
+
+    color-scheme: dark;
+
+  --elev-1: inset 0 1px 0 oklch(1 0 0 / 9%);
+  --elev-2: inset 0 1px 0 oklch(1 0 0 / 14%), 0 8px 24px -8px oklch(0 0 0 / 65%);
+  --elev-press: inset 0 1px 0 oklch(1 0 0 / 9%);
+  --focus-ring: 0 0 0 2px oklch(1 0 0 / 18%);
+
+  --chart-1: oklch(0.42 var(--tint-c) var(--tint-h));
+  --chart-2: oklch(0.52 var(--tint-c) var(--tint-h));
+  --chart-3: oklch(0.62 var(--tint-c) var(--tint-h));
+  --chart-4: oklch(0.72 var(--tint-c) var(--tint-h));
+  --chart-5: oklch(0.82 var(--tint-c) var(--tint-h));
+  --fill-ok:   oklch(0.60 0.10 var(--h-ok));
+  --fill-warn: oklch(0.66 0.10 var(--h-warn));
+  --fill-info: oklch(0.60 0.09 var(--h-info));
+  --fill-bad:  oklch(0.58 0.14 var(--h-bad));
+
+  --background: oklch(0.06 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.95 var(--tint-c) var(--tint-h));
+  --card: oklch(0.125 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.95 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.165 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.95 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.95 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.07 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.185 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.95 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.195 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.64 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.26 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.985 var(--tint-c) var(--tint-h));
+  --destructive: oklch(0.78 0.19 var(--h-bad));
+  --border: oklch(0.36 var(--tint-c) var(--tint-h));
+  --input: oklch(0.34 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.95 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.165 var(--tint-c) var(--tint-h));
+  --card-shadow: var(--elev-2);
+  --scrim: oklch(0 0 0 / 60%);
+}
+
+/* Status. The only place a hue appears, and each one is a pair: a
+   translucent fill and a solid text colour, tuned per mode so the text
+   clears contrast against its own fill rather than against the page.
+   Hues: 155 green, 250 blue, 75 amber, 25 red, and achromatic. */
+.status-ok      { background: var(--status-ok-bg); color: var(--status-ok-fg); }
+.status-info    { background: var(--status-info-bg); color: var(--status-info-fg); }
+.status-pending { background: var(--status-pending-bg); color: var(--status-pending-fg); }
+.status-error   { background: var(--status-error-bg); color: var(--status-error-fg); }
+.status-neutral { background: var(--status-neutral-bg); color: var(--status-neutral-fg); }
+
+/* 深色没有第二组规则。这五行以前在这里抄了两遍——一遍在 prefers-color-scheme 里，
+   一遍在显式属性下——而两遍写的都是同一个 var()。token 本身已经按主题翻了，
+   所以那十行不改变任何像素，只会让下一个人以为状态色是在组件层分主题的。 */

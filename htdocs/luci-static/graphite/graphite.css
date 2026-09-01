@@ -1,0 +1,554 @@
+/* Project layer. Loads after tokens.css, components.css and shell.css,
+   which are verbatim copies of the design system: change an upstream value
+   there and re-copy, never here. This file holds the names LuCI needs that
+   the design system does not carry, and the few values re-declared for a
+   router console. */
+
+:root {
+  /* A closed scale: LuCI is denser than a consumer console, so body text is
+     0.875rem. A size not on this ladder is the violation. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+
+  /* Per script: one value for both leaves Chinese cramped or Latin loose. */
+  --lh-cjk: 1.8;
+  --lh-latin: 1.6;
+  --lh-title: 1.25;
+  --lh-control: 1.5;
+
+  /* Text on a filled destructive button — LuCI ships solid delete buttons. */
+  --destructive-foreground: oklch(0.99 0 0);
+
+  /* A step lighter than --border: forty CBI rows need separating without a
+     full line under each. */
+  --outline-variant: oklch(0.92 var(--tint-c) var(--tint-h));
+
+
+  /* Tooltips and indicators. In an achromatic system the only way to stand
+     out of the page is a reversal of lightness. */
+  --inverse-surface: oklch(0.18 var(--tint-c) var(--tint-h));
+  --inverse-foreground: oklch(0.97 var(--tint-c) var(--tint-h));
+  /* The label sits on the bar and inverts itself against whatever is under
+     it, so the fill is free to be the strongest value in the scheme. */
+  --bar-fill: var(--foreground);
+
+  /* For whatever LuCI nests inside a tooltip: these belong to the inverted
+     surface, so they flip with it. */
+  --inverse-fill: oklch(1 0 0 / 14%);
+  --inverse-line: oklch(1 0 0 / 28%);
+
+  /* One step above --elev-2, for a modal over a card. */
+  --elev-3: 0 12px 32px -8px oklch(0 0 0 / 14%), 0 4px 8px -4px oklch(0 0 0 / 6%);
+
+
+  /* Zone colours arrive as inline background-color from
+     firewall.getZoneColorStyle(), so they are data and the theme keeps them.
+     The filter drops the intensity and keeps the hue, which is the part
+     carrying the meaning. A token, because dark has to restate it: the
+     pastel that reads as a tint on white glows on a near-black ground. */
+  --zone-tint: saturate(0.5);
+
+  /* Zone colours are always light, so their text is dark in both schemes.
+     Following --foreground made the interface name disappear in dark. */
+  --zone-foreground: oklch(0.2 0 0);
+
+  /* Aliases, not copies: the design system calls these pending and error.
+     A value changed upstream has to reach here rather than be shadowed. */
+  --status-warn-bg: var(--status-pending-bg);
+  --status-warn-fg: var(--status-pending-fg);
+  --status-bad-bg:  var(--status-error-bg);
+  --status-bad-fg:  var(--status-error-fg);
+
+  /* This project's own: LuCI's alerts want a border stronger than a 12%
+     fill and weaker than the text. */
+  --status-ok-line:   oklch(0.45 0.12 var(--h-ok) / 35%);
+  --status-info-line: oklch(0.45 0.10 var(--h-info) / 35%);
+  --status-warn-line: oklch(0.55 0.12 var(--h-warn) / 35%);
+  --status-bad-line:  oklch(0.53 0.18 var(--h-bad) / 35%);
+
+  /* 15rem rather than 14rem: LuCI's second-level titles wrap at 14rem in
+     Chinese and German, and the sidebar depends on that one alignment. */
+  --sidebar-w: 15rem;
+
+  /* The design system's own value. Widening it to 78rem for the interface
+     table pushed every text-heavy page past a hundred characters a line; a
+     wide table already has its own answer, which is to scroll in place. */
+  --content-max: 72rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --destructive-foreground: oklch(0.08 0 0);
+    --outline-variant: oklch(0.26 var(--tint-c) var(--tint-h));
+    --inverse-surface: oklch(0.93 var(--tint-c) var(--tint-h));
+    --inverse-foreground: oklch(0.12 var(--tint-c) var(--tint-h));
+    --bar-fill: var(--foreground);
+  --inverse-fill: oklch(0 0 0 / 12%);
+    --inverse-line: oklch(0 0 0 / 24%);
+    --elev-3: inset 0 1px 0 oklch(1 0 0 / 16%), 0 16px 40px -12px oklch(0 0 0 / 75%);
+    --zone-tint: saturate(0.5);
+    /* Only the line variants. The fills and the text are the design system's now —
+       it carries a dark branch for all four, and re-stating them here held them
+       at the values they had before it raised them. */
+    --status-ok-line:   oklch(0.55 0.12 var(--h-ok) / 40%);
+    --status-info-line: oklch(0.55 0.10 var(--h-info) / 40%);
+    --status-warn-line: oklch(0.60 0.12 var(--h-warn) / 40%);
+    --status-bad-line:  oklch(0.58 0.18 var(--h-bad) / 40%);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --destructive-foreground: oklch(0.08 0 0);
+  --outline-variant: oklch(0.26 var(--tint-c) var(--tint-h));
+  --inverse-surface: oklch(0.93 var(--tint-c) var(--tint-h));
+  --inverse-foreground: oklch(0.12 var(--tint-c) var(--tint-h));
+  --bar-fill: var(--foreground);
+  --inverse-fill: oklch(0 0 0 / 12%);
+  --inverse-line: oklch(0 0 0 / 24%);
+  --elev-3: inset 0 1px 0 oklch(1 0 0 / 16%), 0 16px 40px -12px oklch(0 0 0 / 75%);
+  --zone-tint: saturate(0.5);
+  /* Only the line variants. The fills and the text are the design system's now —
+     it carries a dark branch for all four, and re-stating them here held them
+     at the values they had before it raised them. */
+  --status-ok-line:   oklch(0.55 0.12 var(--h-ok) / 40%);
+  --status-info-line: oklch(0.55 0.10 var(--h-info) / 40%);
+  --status-warn-line: oklch(0.60 0.12 var(--h-warn) / 40%);
+  --status-bad-line:  oklch(0.58 0.18 var(--h-bad) / 40%);
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+
+/* The status classes read the tokens above, so light and dark are declared
+   once each in the token layer and these five rules need no dark branch. */
+.status-ok      { background: var(--status-ok-bg);   color: var(--status-ok-fg); }
+.status-info    { background: var(--status-info-bg); color: var(--status-info-fg); }
+.status-pending { background: var(--status-warn-bg); color: var(--status-warn-fg); }
+.status-error   { background: var(--status-bad-bg);  color: var(--status-bad-fg); }
+
+/* Body copy is denser here than in a consumer console, and the line height
+   follows the page's language rather than one compromise value. */
+body { font-size: var(--text-base); line-height: var(--lh-cjk); }
+body.lang_en, body.lang_de, body.lang_ru, body.lang_fr, body.lang_es,
+body.lang_it, body.lang_pt, body.lang_pl, body.lang_tr { line-height: var(--lh-latin); }
+
+/* The shell fills the viewport and the two columns scroll independently.
+   sticky is not available for the sidebar: components.css sets overflow-x on
+   html and body, and an ancestor overflow other than visible silently turns
+   sticky off. .shell-content already owns the scrolling; this block only
+   bounds it with a height. */
+.shell { block-size: 100vh; overflow: hidden; }
+@supports (block-size: 100dvh) { .shell { block-size: 100dvh; } }
+.shell-aside { block-size: 100%; overflow-y: auto; overscroll-behavior: contain; }
+
+/* The right column scrolls as one, so its scrollbar runs the full height
+   rather than starting below the bar. sticky works here because .shell-main
+   is itself the scroll container. */
+.shell-main { block-size: 100%; min-block-size: 0; overflow-y: auto; }
+.shell-content { overflow: visible; }
+.shell-header { position: sticky; inset-block-start: 0; z-index: 30; }
+
+/* ── Parts the design system does not carry ─────────────────── */
+
+.page-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme-switch { display: flex; gap: var(--sp-1); }
+/* Chosen without a hue: a surface plus a border the others do not have. */
+.theme-switch [role="radio"][aria-checked="true"] {
+  background: var(--accent);
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+/* Tab row under the page title. Same shape as .cbi-tabmenu in luci.css,
+   which is the row luci-base renders for a form's own tabs. */
+.tabs {
+  list-style: none;
+  margin: 0 0 var(--sp-4);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  box-shadow: inset 0 -1px 0 var(--border);
+}
+.tab {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--control-h-sm);
+  padding: var(--sp-2) var(--sp-4);
+  color: var(--foreground);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  border-block-end: 2px solid transparent;
+}
+.tab[data-active] { color: var(--foreground); font-weight: 600; border-block-end-color: var(--foreground); }
+.tab:hover { color: var(--foreground); }
+
+.shell-footer {
+  padding: var(--sp-4);
+  border-block-start: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+.shell-footer a { color: inherit; }
+
+/* The mode row only appears when a device has more than one mode. */
+#modemenu { list-style: none; margin: 0; padding: var(--sp-2) var(--sp-3); border-block-start: 1px solid var(--border); display: flex; gap: var(--sp-1); }
+#modemenu[hidden] { display: none; }
+
+/* The login screen. */
+.login { min-block-size: 100vh; display: grid; place-items: center; padding: var(--sp-5) var(--sp-4); background: var(--background); }
+@supports (min-block-size: 100dvh) { .login { min-block-size: 100dvh; } }
+/* 一个值同时管两个方向。面板的左右内缩、头部到表单、按钮到铭牌，
+   全部读 --login-inset —— 它们是同一条边界的四个面，分开写就会各自漂。 */
+.login-panel {
+  --login-inset: var(--sp-6);
+  inline-size: 100%;
+  max-inline-size: 24rem;
+  padding: var(--login-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--elev-2);
+}
+.login-head { display: grid; justify-items: center; gap: var(--sp-2); margin-block-end: var(--login-inset); text-align: center; }
+.login-head h1 { margin: 0; font-size: var(--text-lg); line-height: var(--lh-title); }
+.login-head p { margin: 0; color: var(--muted-foreground); font-size: var(--text-sm); }
+
+/* The sidebar's square, one step up. */
+.login-head .mark {
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--radius-lg);
+  display: grid;
+  place-items: center;
+  background: var(--foreground);
+  color: var(--background);
+}
+.login-head .mark > .ico { inline-size: 28px; block-size: 28px; }
+
+/* The nameplate under the form: there to be checked, not read. */
+.login-foot {
+  margin: var(--login-inset) 0 0;
+  padding-block-start: var(--sp-4);
+  border-block-start: 1px solid var(--border);
+  display: grid;
+  gap: var(--sp-1);
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  line-height: var(--lh-cjk);
+}
+.login-foot > div { display: flex; gap: var(--sp-2); min-inline-size: 0; }
+.login-foot dt { flex: none; }
+.login-foot dd { margin: 0; min-inline-size: 0; color: var(--foreground); overflow-wrap: anywhere; }
+
+/* Texture from the grey ramp, since an achromatic palette has no colour to
+   spend on it: a faint dot grid and a lift behind the card. Both come from
+   --foreground at percentages low enough not to survive a screenshot. */
+.login {
+  background-image:
+    radial-gradient(circle at 50% 0%, oklch(from var(--foreground) l c h / 5%), transparent 60%),
+    radial-gradient(oklch(from var(--foreground) l c h / 7%) 1px, transparent 1px);
+  background-size: 100% 32rem, 22px 22px;
+  background-position: center top, center top;
+  background-repeat: no-repeat, repeat;
+}
+
+/* ── Phone ──────────────────────────────────────────────────────
+   The design system's phone shell is a bottom bar, which suits four
+   destinations. LuCI has thirty behind five groups, so the sidebar becomes a
+   drawer instead of reusing .bottomnav.
+
+   The toggle is present at every width and does two things: on a phone it
+   opens that drawer, on a wide screen it collapses the sidebar to a rail. */
+.icon-btn#sidebar-toggle { display: grid; }
+
+@media (min-width: 48.0625rem) {
+  :root[data-rail] { --sidebar-w: 3.75rem; }
+  :root[data-rail] .brand .name,
+  :root[data-rail] .nav-label,
+  :root[data-rail] .nav-item > span:not(.ico-host) { display: none; }
+  :root[data-rail] .brand,
+  :root[data-rail] .nav-item { justify-content: center; padding-inline: 0; }
+  /* No gutters in the rail: 12px either side leaves the active marker,
+     positioned at the item's leading edge, hanging 12px inside the rail. */
+  :root[data-rail] .nav {
+    padding-inline: 0;
+    /* No scrollbar in the rail. It is an overlay bar taking no layout space,
+       so the icons are centred — measured at 29.5 in a rail whose centre is
+       30 — but at 60px it is the only other vertical thing on screen and the
+       pair reads as one column with the icons pushed left. The cost is the
+       "there is more below" cue; the rail still scrolls by wheel and drag. */
+    scrollbar-width: none;
+  }
+  :root[data-rail] .nav::-webkit-scrollbar { display: none; }
+
+  /* The row band becomes a 60px slab around a 20px glyph in the rail, so the
+     fill moves to the icon's own box. The item keeps its full width because
+     the active marker has to reach the rail's edge. */
+  :root[data-rail] .nav-item { background: none; }
+  :root[data-rail] .nav-item > .ico-host {
+    inline-size: var(--control-h);
+    block-size: var(--control-h);
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-md);
+    transition: background-color var(--dur-hover) var(--ease-out);
+  }
+  :root[data-rail] .nav-item[data-active] > .ico-host {
+    background: oklch(from var(--foreground) l c h / 6%);
+  }
+}
+
+@media (hover: hover) and (min-width: 48.0625rem) {
+  :root[data-rail] .nav-item:hover > .ico-host { background: var(--accent); }
+  /* Without labels the group rule is the only thing marking a group end. */
+  :root[data-rail] .nav { gap: var(--sp-3); }
+  :root[data-rail] .nav-group + .nav-group { border-block-start: 1px solid var(--border); padding-block-start: var(--sp-3); }
+  .shell-aside { transition: width var(--dur-surface) var(--ease-out); }
+}
+
+@media (max-width: 48rem) {
+  /* At 440px the title, a refresh button and three theme buttons want the
+     same row and the page name is left with about two characters. The
+     controls give: both stay above the tap minimum, which the coarse-pointer
+     block in components.css still raises. */
+  .shell-header .icon-btn { inline-size: var(--control-h-sm); block-size: var(--control-h-sm); }
+  .shell-header .btn,
+  .shell-header .cbi-button {
+    min-block-size: var(--control-h-sm);
+    padding-inline: var(--sp-2);
+    font-size: var(--text-sm);
+  }
+  .shell-header .hdr-actions { gap: var(--sp-1); }
+  .shell-header .page-title { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* space-between leaves no separation once the two groups meet, and a long
+     page name ran into the Refreshing badge. A gap is a floor the
+     distribution cannot spend. */
+  .shell-header { gap: var(--sp-3); }
+  .shell-header > .hdr-actions:first-child { min-inline-size: 0; flex: 0 1 auto; }
+  .shell-header > .hdr-actions:last-child { flex: 0 0 auto; }
+
+
+  .shell-aside {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 40;
+    transform: translateX(-101%);
+    transition: transform var(--dur-surface) var(--ease-out);
+    box-shadow: var(--elev-3);
+    background: var(--card);
+  }
+
+  /* The button owns the state and the shell reads it: one place. */
+  body:has(#sidebar-toggle[aria-expanded="true"]) .shell-aside { transform: none; }
+  /* A ::after cannot receive a click, so this scrim dims but does not close.
+     Closing is handled in menu-graphite.js. */
+  body:has(#sidebar-toggle[aria-expanded="true"])::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    background: var(--scrim);
+  }
+
+  .shell-content { padding: var(--sp-4) var(--sp-3); }
+  .login-panel { --login-inset: var(--sp-5); }
+}
+
+/* Links take the surrounding ink and are marked by an underline, not a hue:
+   where colour means status, a blue link is a false signal. */
+a { color: inherit; }
+
+/* A whitelist of the places prose appears, not a blacklist of everything
+   that is not prose — the blacklist version underlined the tab row, and every
+   new component would have had to be added to it. */
+.shell-content p a,
+.shell-content .td a,
+.shell-content .cbi-value-description a,
+.shell-content .cbi-section-descr a,
+.shell-content .cbi-map-descr a,
+.shell-footer a,
+.login-panel p a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+.shell-content p a:hover,
+.shell-content .td a:hover { text-decoration-thickness: 2px; }
+/* Anything wearing a control's box is not prose, wherever it sits. */
+.shell-content a.btn,
+.shell-content a.cbi-button,
+.shell-content a.nav-item,
+.shell-content a.tab { text-decoration: none; }
+.brand, .shell-footer a, .tab { color: inherit; }
+
+/* Not muted: in a console every entry is a place you go to work, and muted
+   reads as "not available". Current is carried by surface and weight. */
+.nav-item { color: var(--foreground); }
+.nav-label { color: var(--muted-foreground); }
+.brand { text-decoration: none; }
+
+/* The login page has no top bar, so its switch floats in the corner. */
+.login .theme-switch {
+  position: fixed;
+  inset-block-start: var(--sp-4);
+  inset-inline-end: var(--sp-4);
+}
+
+/* A span, because LuCI's E() cannot create SVG elements. */
+.ico-host { display: inline-flex; flex: none; }
+
+/* Lucide's own weight. A stroke width is part of an icon set's geometry, not
+   a preference; the design system's 1.75 was tuned for icons it drew. */
+.ico { stroke-width: 2; }
+
+/* A router menu is thirty near-identical lines and the glyph is what the eye
+   navigates by. At 16px they sit below the label's cap height and read as
+   bullets. Icons in buttons and the top bar stay at 16. */
+.nav-item > .ico,
+.nav-item > .ico-host > .ico,
+.nav-label > .ico { inline-size: 20px; block-size: 20px; }
+
+/* ── Things the vendored copies do not carry ────────────────── */
+
+/* A `display:` rule of ours outranks the UA sheet's [hidden], so a hidden
+   #modemenu still drew its border-top under the last menu item. */
+[hidden] { display: none; }
+
+/* LuCI puts an <hr> between a map's description and its actions. The
+   browser's default groove reads as a section boundary; this is a
+   separator. */
+hr {
+  border: 0;
+  border-block-start: 1px solid var(--outline-variant);
+  margin-block: var(--sp-4);
+}
+
+/* The distance belongs to the row, not to the button inside it: the button's
+   class varies by page — .cbi-button-add on the interfaces list, a plain .btn
+   elsewhere. */
+.cbi-section-create,
+.cbi-section > .btn,
+.cbi-section > .cbi-button { margin-block-start: var(--sp-4); }
+
+/* luci-base's clickable status chips carry data-indicator and a pointer, so
+   they are operations and get a control's box. */
+.label[data-indicator],
+.label[data-style] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--control-h-sm);
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.label[data-style="active"] { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+
+/* A ghost, so it stops competing with the heading beside it. It keeps its
+   text: that text is the only label a screen reader gets.
+
+   It has to come after the two rules above — all three are one class plus one
+   attribute, so source order decides. */
+.label[data-indicator="poll-status"],
+.label[data-indicator="poll-status"][data-style="active"] {
+  background: none;
+  border-color: transparent;
+  color: var(--muted-foreground);
+}
+@media (hover: hover) {
+  .label[data-indicator="poll-status"]:hover {
+    background: var(--accent);
+    color: var(--foreground);
+  }
+}
+
+/* This divider is the top bar's bottom border continued across the sidebar,
+   so it starts where the brand ends and runs the full width. */
+.shell-aside > .rule {
+  /* The bar's bottom border sits inside its own --header-h box, so it lands
+     one pixel above this rule and the two read as a line that does not quite
+     meet. --hairline is the token for cancelling a border width. */
+  margin-block: calc(var(--hairline) * -1) var(--sp-3);
+  margin-inline: 0;
+}
+
+/* Larger than the design system's 26px: this square sits beside the hostname,
+   which is the one piece of text saying which of several devices this tab is
+   pointed at, and at 26px it read as a bullet rather than a mark. */
+.brand .mark {
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+}
+.brand .mark > .ico { inline-size: 20px; block-size: 20px; }
+/* Menu entries wrap rather than truncate — "Cloudflare Zero Trust Tunnel" is
+   four words and the middle of a product name is not the part to lose — but
+   they stop at two lines. menu-graphite.js puts the full name on every link
+   as aria-label. */
+.nav-item > span:not(.ico-host) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* A shade up, and the line-height is not what puts the text low. A font
+   reserves more ascent than its glyphs use, so a line box centred against the
+   mark lands the ink below the mark's own centre. The correction is that gap
+   and nothing more, which makes it measurable rather than a matter of taste:
+   the ink box comes from the canvas metrics for this exact string in this
+   exact face, and its centre sits 0.7px under the line box's at 16px.
+
+   The first value here was 0.125em, taken from the difference between the
+   font's reserved ascent and its cap height. That is the wrong quantity — it
+   describes where the baseline sits, not where the ink centres — and it
+   overshot by nearly three times, which read as text floating above the mark.
+
+   In em, because it corrects a font metric and has to move with the type. And
+   it is a pair, not a single negative margin — align-items centres the margin
+   box, so a lone negative top shrinks that box and the centring hands half of
+   it straight back. Equal and opposite keeps the box the same size and moves
+   it. */
+.brand .name {
+  font-size: var(--text-md);
+  letter-spacing: -0.01em;
+  margin-block: -0.045em 0.045em;
+}
+
+/* Selected text. The browser's default blue belongs to no design and is the
+   loudest thing on an achromatic page the moment anyone drags across a line.
+
+   -moz-selection is listed separately on purpose: a selector list containing
+   one unrecognised pseudo-element is dropped whole. */
+::selection      { background: var(--foreground); color: var(--background); }
+::-moz-selection { background: var(--foreground); color: var(--background); }
+
+/* The checkbox tick, the radio dot and the range track, from one property. */
+input[type="checkbox"], input[type="radio"], input[type="range"], progress {
+  accent-color: var(--foreground);
+}
+
+

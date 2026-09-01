@@ -1,0 +1,27 @@
+Vendored stylesheets
+====================
+
+Three files under htdocs/luci-static/graphite/ are verbatim copies and are
+never edited in place:
+
+  tokens.css      <- ~/design-system/app/tokens.css
+  components.css  <- ~/design-system/app/components.css
+  shell.css       <- ~/design-system/app/shell.css
+
+They carry no source note of their own, because a note is an edit and these
+files have to stay byte-identical to their source for the copy to be checkable
+at all:
+
+  diff -q htdocs/luci-static/graphite/tokens.css ~/design-system/app/tokens.css
+
+Anything this project needs on top of them goes in graphite.css, and anything
+that turns out to belong upstream is changed in the design system and comes
+back through a re-copy. A change made in the copy is the drift the whole
+arrangement exists to prevent — it has happened once already, when the design
+system gained color-scheme, two-engine scrollbars and a shared brand height
+that this package was still patching in locally.
+
+Last synchronised: 2026-08-31.
+
+Lucide icons (menu-graphite.js, header.ut) are a separate matter and are
+covered by LICENSES/lucide-ISC.txt.

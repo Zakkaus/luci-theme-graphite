@@ -1,0 +1,30 @@
+{#
+ Copyright 2026 Zakk <zakk@gentoozh.org>
+ Licensed to the public under the Apache License 2.0.
+
+ Closes what header.ut opened, in reverse. The menu module is required here
+ rather than in the head, because base's header creates L after the theme's
+ header has already run.
+-#}
+					{% if (!blank_page): %}
+					</div>{# shell-inner #}
+				</div>{# shell-content #}
+
+				<footer class="shell-footer">
+					<span>
+						<a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">
+							{{ version.luciname }} ({{ version.luciversion }})</a>
+						·
+						<a href="{{ entityencode(version.disturl ?? '#', true) }}" target="_blank" rel="noreferrer">
+							{{ version.distname }} {{ version.distversion }} ({{ version.distrevision }})</a>
+						{% if (lua_active): %}
+							· {{ _('Lua compatibility mode active') }}
+						{% endif %}
+					</span>
+				</footer>
+			</div>{# shell-main #}
+		</div>{# shell #}
+		<script>L.require('menu-graphite')</script>
+		{% endif %}
+	</body>
+</html>

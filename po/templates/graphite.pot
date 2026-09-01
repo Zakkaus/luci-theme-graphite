@@ -1,0 +1,87 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: luci-graphite\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: luci-theme-graphite/htdocs/luci-static/resources/view/graphite/sysauth.js:43
+msgid "Logging in…"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/footer.ut:21
+msgid "Lua compatibility mode active"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:183 luci-theme-graphite/ucode/template/themes/graphite/header.ut:191
+msgid "Navigation"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:205 luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:25
+msgid "Theme"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:206 luci-theme-graphite/ucode/template/themes/graphite/header.ut:206 luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:26
+msgid "Auto"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:209 luci-theme-graphite/ucode/template/themes/graphite/header.ut:209 luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:29
+msgid "Light"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:212 luci-theme-graphite/ucode/template/themes/graphite/header.ut:212 luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:32
+msgid "Dark"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:223
+msgid "No password set!"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:224
+msgid "There is no password set on this router. Please configure a root password to protect the web interface."
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:226
+msgid "Go to password configuration..."
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:233
+msgid "System running in recovery (initramfs) mode."
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:234
+msgid "No changes to settings will be stored and are lost after rebooting. This mode should only be used to install a firmware upgrade"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:236
+msgid "Go to firmware upgrade..."
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:243
+msgid "JavaScript required!"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:244
+msgid "You must enable JavaScript in your browser or LuCI will not work properly."
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:41
+msgid "Authorization Required"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:54
+msgid "Invalid username and/or password! Please try again."
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:67
+msgid "Username"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:73
+msgid "Password"
+msgstr ""
+
+#: luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:113
+msgid "Log in"
+msgstr ""
+

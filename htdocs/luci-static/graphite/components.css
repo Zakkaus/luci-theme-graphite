@@ -1,0 +1,603 @@
+/* ─────────────────────────────────────────────────────────────
+   Component layer — application UI
+   Requires tokens.css.
+
+   Everything here keys off a data-slot attribute rather than a class
+   name. The attribute is the component's public surface: a page can
+   restyle nothing by accident, and a hand-inlined copy of a component
+   carries no attribute, so it is visible to a checker even when the
+   symbol is still imported somewhere.
+
+   No rule below reads a colour literal. If you need one, the token
+   layer is missing a name.
+   ───────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* `fieldset` and `legend` carry defaults no other element has, and they only appear
+   once someone groups controls — so a library that never uses one ships the defaults
+   unnoticed. Three of them:
+
+   `margin-inline: 2px`, which puts a `<fieldset class="card">` two pixels right of a
+   `<div class="card">` carrying the same class, and everything inside it follows.
+
+   A border and padding of its own, which draw a second frame inside whatever surface
+   it was given.
+
+   And the legend's notch: it is the one element the browser cuts into a border, which
+   is right for 1996 and wrong for every card layout since. Floating it drops it out of
+   the notch and into ordinary block flow. */
+fieldset { margin-inline: 0; padding: 0; border: 0; min-inline-size: 0; }
+fieldset > legend { float: inline-start; inline-size: 100%; padding-inline: 0; }
+fieldset > legend + * { clear: both; }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* The page never scrolls sideways. Wide content scrolls inside its own
+   container instead — see .scroll-x below. */
+html, body { overflow-x: hidden; max-inline-size: 100vw; }
+
+a, [role="button"] { -webkit-tap-highlight-color: transparent; }
+
+/* tabs-trigger was in this list with no rules of its own anywhere — a
+   selector for a component the library does not provide. If tabs are added,
+   their own rules carry the cursor. */
+a, button, [role="button"], [data-slot="button"],
+[data-slot="select-trigger"], label[for],
+input[type="checkbox"], input[type="radio"],
+summary, [tabindex]:not([tabindex="-1"]) { cursor: pointer; }
+
+/* ── Focus ────────────────────────────────────────────────────
+   One visible ring, on the token that contrasts with whatever
+   surface the element lands on. Removing an outline without
+   replacing it is the single most common way a keyboard user is
+   locked out of a working interface. */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ── Button ───────────────────────────────────────────────────
+   Press is a scale down, hover is a lift. Both are transforms, so
+   both are disabled by the reduced-motion block. */
+/* Control height is a closed ladder, same shape as radius and spacing.
+   Padding rounds UP the spacing ladder: a control whose text sits against its
+   border reads as broken, and rounding down was exactly how that happened here.
+   Every control in a row shares --control-h so a toolbar lines up. */
+[data-slot="button"] {
+  font: inherit;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  block-size: var(--control-h);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  padding-inline: var(--sp-4);
+  transition:
+    transform var(--dur-press) ease,
+    box-shadow var(--dur-hover) ease,
+    border-color var(--dur-hover) ease,
+    background-color var(--dur-press) ease;
+}
+/* Focus was missing entirely. A control a keyboard can reach and cannot show
+   is unusable, and it is the single most common accessibility defect here. */
+[data-slot="button"]:focus-visible,
+[data-slot="switch"]:focus-visible,
+[data-slot="card"][data-clickable]:focus-visible,
+.nav-item:focus-visible,
+.icon-btn:focus-visible,
+.avatar:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot="button"][data-variant="primary"] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+[data-slot="button"][data-variant="ghost"] {
+  background: transparent;
+  border-color: transparent;
+}
+[data-slot="button"]:hover:not(:disabled):not([aria-disabled="true"]) {
+  transform: translateY(-1px);
+  box-shadow: var(--elev-press);
+}
+[data-slot="button"]:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: scale(0.97);
+}
+/* A busy control carries aria-disabled and blocks its own handler.
+   Plain `disabled` drops it out of the tab order, so a screen-reader
+   user loses the element in the middle of the operation they started. */
+[data-slot="button"][aria-disabled="true"] { opacity: 0.55; cursor: default; }
+[data-slot="button"]:disabled { opacity: 0.55; cursor: default; }
+
+/* ── Card ─────────────────────────────────────────────────────
+   Two shadows: a resting one that only separates the card from the
+   page, and a hover one that lifts it. A card that is clickable
+   lifts further and settles on press. */
+[data-slot="card"] {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--sp-4);
+  box-shadow: var(--card-shadow);
+  transition:
+    transform var(--dur-hover) ease,
+    box-shadow var(--dur-surface) ease,
+    border-color var(--dur-hover) ease;
+}
+[data-slot="card"]:hover {
+  box-shadow: var(--elev-2);
+}
+a[data-slot="card"]:hover, [data-slot="card"][data-clickable]:hover {
+  transform: translateY(-2px);
+}
+a[data-slot="card"]:active, [data-slot="card"][data-clickable]:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.surface-raised {
+  background: var(--surface-raised);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+/* ── Input ────────────────────────────────────────────────────
+   Focus darkens the border to the foreground and adds a soft ring,
+   rather than replacing the border colour with a hue nobody declared. */
+[data-slot="textarea"] { min-block-size: 4.5rem; resize: vertical; line-height: 1.6; }
+[data-slot="input"]:focus, [data-slot="textarea"]:focus {
+  outline: none;
+  border-color: var(--foreground);
+  box-shadow: var(--focus-ring);
+}
+[data-slot="input"][aria-invalid="true"], [data-slot="textarea"][aria-invalid="true"] {
+  border-color: var(--destructive);
+}
+/* The error text is associated with aria-describedby, not merely placed
+   next to the field. Adjacency is invisible to a screen reader. */
+[data-slot="field-error"] { color: var(--destructive); font-size: 0.75rem; }
+
+/* ── Table ────────────────────────────────────────────────────
+   The header is small, spaced and muted so the data reads first. */
+[data-slot="table"] { inline-size: 100%; border-collapse: collapse; }
+[data-slot="table-head"] {
+  text-align: start;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  padding: var(--sp-2) var(--sp-3);
+  border-block-end: var(--hairline) solid var(--border);
+}
+[data-slot="table-cell"] {
+  /* The same ratio the header takes. One table reading 8/12 in its head and
+     12/12 in its body is the pair a reader sees side by side. */
+  padding: var(--sp-2) var(--sp-3);
+  border-block-end: var(--hairline) solid var(--border);
+}
+[data-slot="table-row"] { transition: background-color var(--dur-press) ease; }
+[data-slot="table-row"]:hover { background: var(--accent); }
+
+/* ── Badge ────────────────────────────────────────────────────
+   Pair with a status class from tokens.css. */
+[data-slot="badge"] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  line-height: 1;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--radius-full);
+}
+
+/* ── Overlay ──────────────────────────────────────────────────
+   Frosted rather than a flat scrim: the page stays legible as
+   context while clearly not being the thing in focus. */
+[data-slot="overlay"] {
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(6px);
+  background: var(--scrim);
+}
+
+/* ── Wide content ─────────────────────────────────────────────
+   Anything that cannot fit — a table, a diagram, a code block —
+   scrolls inside this, never by widening the page. */
+.scroll-x { overflow-x: auto; }
+
+/* ── Scrollbar ────────────────────────────────────────────────*/
+/* Scrollbars, both engines. Styling only ::-webkit-scrollbar leaves Firefox with
+   the platform default, which on a dark surface is a bright bar running down the
+   side of the UI — the single most conspicuous thing on the screen, and it is
+   chrome, not content. Firefox needs scrollbar-width and scrollbar-color; there
+   is no overlap between the two mechanisms. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+::-webkit-scrollbar { inline-size: 6px; block-size: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb); border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+/* A separator needs room on both sides. Against the block above it, it stops
+   reading as a separator and starts reading as that block's underline; against
+   the action row below it, the button looks stuck to the line. */
+[data-slot="separator"] {
+  border: 0; block-size: var(--hairline); background: var(--border);
+  margin-block: var(--sp-5);
+}
+
+/* ── Motion ───────────────────────────────────────────────────
+   One curve, a small set of durations, and entrances that are all
+   the same gesture at different distances. */
+@keyframes enter-up   { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes enter-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes enter-scale{ from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+
+.enter-up    { animation: enter-up    var(--dur-enter-lg) var(--ease-out) both; }
+.enter-fade  { animation: enter-fade  var(--dur-enter)    ease            both; }
+.enter-scale { animation: enter-scale var(--dur-enter)    var(--ease-out) both; }
+
+/* Staggered children. The ladder is bounded: past the eighth child every
+   further child shares the last delay instead of arriving with no
+   animation at all. An unbounded 1..8 ladder is correct until the ninth
+   item exists, and then silently wrong. */
+.stagger > * { animation: enter-up var(--dur-enter-lg) var(--ease-out) both; }
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 50ms; }
+.stagger > *:nth-child(3) { animation-delay: 100ms; }
+.stagger > *:nth-child(4) { animation-delay: 150ms; }
+.stagger > *:nth-child(5) { animation-delay: 200ms; }
+.stagger > *:nth-child(6) { animation-delay: 250ms; }
+.stagger > *:nth-child(7) { animation-delay: 300ms; }
+.stagger > *:nth-child(n+8) { animation-delay: 350ms; }
+
+/* ── Reduced motion ───────────────────────────────────────────
+   This block governs CSS animation only. It cannot reach a transform
+   a JavaScript animation library writes to style on every frame:
+   there is no CSS duration there to shorten. A library-driven UI needs
+   its own declaration — Framer Motion's MotionConfig reducedMotion="user",
+   or the equivalent — and any component that drives its own loop (a
+   timer that re-arms, a spring on a raw motion value) has to read the
+   preference itself and render the settled state.
+   Getting this half right is the usual outcome, and it looks handled. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Switch. State lives on aria-checked, never on a class, so JS sets state and
+   the stylesheet reads it. The pill radius is a shape, not a step on the ladder. */
+[data-slot="switch"] {
+  appearance: none; inline-size: 2.25rem; block-size: 1.25rem; flex: none;
+  border: 1px solid var(--border); border-radius: var(--radius-full);
+  background: var(--muted); position: relative; cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-out),
+              border-color var(--dur-hover) var(--ease-out);
+}
+[data-slot="switch"]::after {
+  content: ""; position: absolute; inset-block-start: 50%;
+  inset-inline-start: 0.1875rem; translate: 0 -50%;
+  inline-size: 0.875rem; block-size: 0.875rem; border-radius: var(--radius-full);
+  background: var(--background);
+  transition: translate var(--dur-hover) var(--ease-out);
+}
+[data-slot="switch"][aria-checked="true"] {
+  background: var(--foreground); border-color: var(--foreground);
+}
+[data-slot="switch"][aria-checked="true"]::after { translate: 1rem -50%; }
+[data-slot="switch"]:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
+[data-slot="switch"][aria-disabled="true"],
+[data-slot="switch"]:disabled { opacity: .5; cursor: not-allowed; }
+
+/* One settings row: name and description on the left, one control on the right. */
+/* Centre, not start. With flex-start a one-line label sits at the top of a row
+   whose control is taller, which reads as a mistake rather than as alignment.
+   When the left cell is a name plus a description, centring the block against
+   the control is what lines the two up. */
+[data-slot="setting"] {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--sp-4); padding: var(--sp-3) 0; border-block-end: 1px solid var(--border);
+}
+[data-slot="setting"]:last-child { border-block-end: 0; }
+[data-slot="setting"] > :first-child { min-inline-size: 0; }
+
+/* Button variants and sizes are a closed set. An inline style overriding
+   padding or radius is the drift this set exists to prevent. */
+/* A link-style command sits inside a settings row, not in a paragraph. A
+   permanent underline makes it read as body-text link decoration and puts a
+   line under something that is a button. Carry it on hover and focus, where it
+   confirms the affordance, and leave the resting state clean. */
+[data-slot="button"][data-variant="link"] {
+  background: none; border-color: transparent; padding-inline: 0;
+  color: var(--foreground); text-decoration: none;
+  text-underline-offset: 0.2em;
+}
+[data-slot="button"][data-variant="link"]:hover,
+[data-slot="button"][data-variant="link"]:focus-visible {
+  text-decoration: underline;
+}
+/* Destructive is an action, not a state, so it does not get a filled surface.
+   The solid form is reserved for the final confirm inside a dialog, where it is
+   the only red on screen. A list with five solid red buttons trains people to
+   ignore red, which is the one colour that must never be ignorable. */
+[data-slot="button"][data-variant="destructive"] {
+  background: none; border-color: var(--destructive); color: var(--destructive);
+}
+[data-slot="button"][data-variant="destructive"][data-emphasis="solid"] {
+  background: var(--destructive); border-color: var(--destructive); color: var(--background);
+}
+[data-slot="button"][data-size="sm"] {
+  block-size: var(--control-h-sm); padding-inline: var(--sp-3); font-size: 0.875rem;
+}
+[data-slot="button"][data-size="lg"] {
+  block-size: var(--control-h-lg); padding-inline: var(--sp-5); font-size: 1rem;
+}
+/* Fields share the control height so a toolbar of buttons, inputs and selects
+   sits on one line without anyone nudging a margin. `block-size`, not
+   `min-block-size`: a floor only promises not-smaller, and an input's line-height
+   of 1.6 plus padding put it at 51.6px beside a 42px button while both declared
+   the same 40px minimum. A row of controls at different heights is the most
+   conspicuous kind of wrong, and it survived here because the token looked like
+   it was doing the work. */
+[data-slot="input"], [data-slot="select-trigger"] { block-size: var(--control-h); padding-block: 0; }
+/* Stated rather than inherited from the rule above: an input carried no radius of
+   its own and took whichever one happened to also match it. */
+[data-slot="input"] { border-radius: var(--radius-lg); }
+
+/* Coarse pointers get the 44px target the mobile section asks for. Declaring it
+   here rather than in the phone shell means it also applies to a touch laptop. */
+@media (pointer: coarse) {
+  /* Small is a visual size, not a target size. On touch the target wins, so the
+     small step rises to the same floor as the default one — it was 2.5rem, and
+     a 40px target under a finger is the thing this block exists to prevent. */
+  :root { --control-h: var(--tap-min); --control-h-sm: var(--tap-min); --control-h-lg: 3.25rem; }
+
+  /* Keyed on what the element is, not on what it is called: a rule listing
+     .icon-btn and .theme-btn misses the next control that needs it and has to
+     be edited every time one is added. Height alone is not enough — an
+     icon-only button was 40px wide and 46 tall, and a finger has to hit both
+     directions. Links inside prose are exempt by WCAG 2.5.8 and stay exempt,
+     which is why only links inside a nav landmark are included. */
+  button, [role="button"], summary,
+  input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+  select, textarea,
+  nav a[href] {
+    min-block-size: var(--tap-min);
+    min-inline-size: var(--tap-min);
+  }
+
+  /* A control whose visual size is deliberately small keeps how it looks and
+     grows what a finger can hit. This used to redeclare `::after`, which is
+     already the switch's knob — so on any touch device the knob became a
+     centred transparent box the size of a finger and the switch had nothing
+     visible inside it. A transparent outline grows the hit area without
+     touching the box: outline is not painted and does not take part in layout,
+     but it is part of the element for hit testing. */
+  [data-slot="switch"] {
+    outline: calc((var(--tap-min) - var(--control-h-sm)) / 2) solid transparent;
+  }
+  input[type="checkbox"], input[type="radio"] {
+    outline: calc((var(--tap-min) - 1em) / 2) solid transparent;
+  }
+}
+
+[data-slot="button"][data-shape="pill"] { border-radius: var(--radius-full); }
+[data-slot="button"][data-block] { inline-size: 100%; justify-content: center; }
+[data-slot="button"][aria-pressed="true"] {
+  background: var(--accent); border-color: var(--foreground);
+}
+
+/* Select trigger. It is a field, so it wears the field's box, not a button's.
+   Left-aligned value, chevron on the trailing edge, and it opens on click, so
+   aria-expanded carries the open state and the chevron reads it. */
+[data-slot="select-trigger"] {
+  font: inherit;
+  inline-size: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  text-align: start;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--input);
+  /* The same rung a button takes. These sit side by side in a toolbar, and a row
+     whose corners disagree reads as unfinished even when the heights match — which
+     they already did, because heights had a check and corners did not. */
+  border-radius: var(--radius-lg);
+  padding: var(--sp-2) var(--sp-3);
+}
+[data-slot="select-trigger"]::after {
+  content: "";
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  flex: none;
+  border-inline-end: 1.5px solid var(--muted-foreground);
+  border-block-end: 1.5px solid var(--muted-foreground);
+  rotate: 45deg;
+  translate: 0 -0.15em;
+  transition: rotate var(--dur-hover) var(--ease-out);
+}
+[data-slot="select-trigger"][aria-expanded="true"]::after { rotate: 225deg; translate: 0 0.1em; }
+[data-slot="select-trigger"]:hover { border-color: var(--foreground); }
+[data-slot="select-trigger"]:focus-visible {
+  outline: none; border-color: var(--foreground);
+  box-shadow: var(--focus-ring);
+}
+[data-slot="select-trigger"][data-placeholder] { color: var(--muted-foreground); }
+
+[data-slot="input"][data-size="lg"], [data-slot="select-trigger"][data-size="lg"] {
+  block-size: var(--control-h-lg); padding-block: 0; padding-inline: var(--sp-4); font-size: 1rem;
+}
+[data-slot="input"][data-size="sm"], [data-slot="select-trigger"][data-size="sm"] {
+  block-size: var(--control-h-sm); padding-block: 0; padding-inline: var(--sp-3); font-size: 0.875rem;
+}
+
+/* A project that writes its own display: rules outranks the UA sheet's
+   [hidden] { display: none }, so an element the code correctly marks hidden
+   stays on screen. The state is right and the stylesheet overrules it, and
+   neither side looks wrong on its own. */
+
+
+/* Tabs. The underline *is* the active indicator, so it must not appear on the
+   others: a row where every tab is underlined says nothing about which one you
+   are on. Inactive tabs carry weight and colour only; the active one takes the
+   rule, and the container carries the hairline the rules sit on. */
+[data-slot="tabs"] {
+  display: flex; gap: var(--sp-4); align-items: stretch;
+  border-block-end: var(--hairline) solid var(--border);
+}
+[data-slot="tabs-trigger"] {
+  font: inherit; background: none; border: 0;
+  /* Horizontal exceeds vertical on anything holding a line of text: the line box
+     already carries its own leading, so equal padding reads tight at the sides and
+     loose above. This had it the other way round at 12 and 4, and adjacent tab
+     labels nearly touched. */
+  padding: var(--sp-2) var(--sp-4);
+  color: var(--muted-foreground);
+  text-decoration: none;
+  border-block-end: 2px solid transparent;
+  margin-block-end: calc(var(--hairline) * -1);
+  transition: color var(--dur-hover) var(--ease-out),
+              border-color var(--dur-hover) var(--ease-out);
+}
+[data-slot="tabs-trigger"]:hover { color: var(--foreground); }
+[data-slot="tabs-trigger"][aria-selected="true"] {
+  color: var(--foreground); font-weight: 600;
+  border-block-end-color: var(--foreground);
+}
+[data-slot="tabs-trigger"]:focus-visible {
+  outline: 2px solid var(--ring); outline-offset: -2px;
+}
+
+/* Segmented / split button. A compound control's height is declared once on the
+   group and its parts stretch into it. Let each part carry its own padding and
+   the container add its own, and the compound ends up taller than the plain
+   buttons beside it — which is the most conspicuous way a toolbar looks wrong,
+   because uneven height reads as broken long before anyone can say why. */
+[data-slot="button-group"] {
+  display: inline-flex; align-items: stretch;
+  block-size: var(--control-h);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--secondary);
+  overflow: hidden;
+}
+[data-slot="button-group"] > [data-slot="button"] {
+  min-block-size: 0; block-size: 100%;
+  border: 0; border-radius: 0; background: none;
+}
+/* The divider between segments is a border on the trailing part, not a spacer:
+   a gap here would show the group's background through the seam. */
+[data-slot="button-group"] > [data-slot="button"] + [data-slot="button"] {
+  border-inline-start: var(--hairline) solid var(--border);
+}
+[data-slot="button-group"][data-variant="primary"] {
+  background: var(--primary); border-color: var(--primary);
+}
+[data-slot="button-group"][data-variant="primary"] > [data-slot="button"] {
+  color: var(--primary-foreground);
+}
+[data-slot="button-group"][data-variant="primary"] > [data-slot="button"] + [data-slot="button"] {
+  border-inline-start-color: oklch(1 0 0 / 22%);
+}
+[data-slot="button-group"][data-size="sm"] { block-size: var(--control-h-sm); }
+[data-slot="button-group"][data-size="lg"] { block-size: var(--control-h-lg); }
+
+/* A control does not decide what container it is put in, so it declares that it
+   does not want the container making layout decisions for it. Dropped into a
+   flex row without this, a pagination arrow stretches to a third of the page.
+   Anything that genuinely should fill its row says so explicitly with
+   data-block or inline-size: 100%. */
+[data-slot="button"], [data-slot="select-trigger"], [data-slot="badge"],
+[data-slot="switch"], [data-slot="button-group"] { flex: none; }
+
+/* Links in an achromatic system cannot rely on colour: the browser default blue
+   is the one hue this palette does not contain, and hue here means state. An
+   underline carries it instead. Anything already shaped as a control — button,
+   nav item, tab, card — announces itself by shape and is excluded. */
+a { color: inherit; text-underline-offset: 0.2em; }
+/* Whitelist, not exclusion. Written as a:not(.btn):not(.nav-item)… the list has
+   to be extended every time a component is added, and an upstream component
+   whose class sits on a wrapper rather than the anchor is never reached at all —
+   the failure being a navigation that quietly grows underlines. A link inside a
+   navigation structure announces itself by position; only links inside running
+   text need the underline, so name those places. */
+p a[href], li a[href], td a[href], dd a[href],
+figcaption a[href], blockquote a[href] {
+  text-decoration: underline;
+}
+p a[href]:hover, li a[href]:hover, td a[href]:hover, dd a[href]:hover,
+figcaption a[href]:hover, blockquote a[href]:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Keep this last. It ties with any single-class or single-attribute component
+   selector, so the later declaration wins — which is the whole point, since the
+   UA sheet's [hidden] loses to every author rule. !important would also work and
+   is worse: it would also override an element being deliberately revealed. */
+[hidden] { display: none; }
+
+/* Native <select>. A system that only styles its own dropdown leaves half the
+   dropdowns on any real page untouched — an upstream form will mix both, and
+   they come out different heights and different widths beside each other. The
+   arrow is drawn with two gradients in currentColor rather than a data URI,
+   because a colour baked into a URI cannot follow the theme. */
+select {
+  font: inherit;
+  appearance: none;
+  block-size: var(--control-h);
+  min-inline-size: var(--field-w);
+  padding-block: 0;
+  padding-inline: var(--sp-3) var(--sp-6);
+  color: var(--foreground);
+  background-color: var(--background);
+  border: var(--hairline) solid var(--input);
+  border-radius: var(--radius-md);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-size: 5px 5px, 5px 5px;
+  background-position:
+    calc(100% - var(--sp-4) - 5px) center,
+    calc(100% - var(--sp-4)) center;
+  background-repeat: no-repeat;
+}
+select:hover { border-color: var(--foreground); }
+select:focus-visible {
+  outline: none; border-color: var(--foreground); box-shadow: var(--focus-ring);
+}
+select[multiple] { min-inline-size: 0; padding-inline-end: var(--sp-3); background-image: none; }
+
+/* A table inside a card already has the card's padding at its outer edge. Left
+   alone, the first column's text sits one cell-padding further in than the
+   section heading above it and the whole card reads crooked. Measure the text
+   node, not the box: the box lines up while the text does not. */
+[data-slot="table"] [data-slot="table-head"]:first-child,
+[data-slot="table"] [data-slot="table-cell"]:first-child { padding-inline-start: 0; }
+[data-slot="table"] [data-slot="table-head"]:last-child,
+[data-slot="table"] [data-slot="table-cell"]:last-child { padding-inline-end: 0; }

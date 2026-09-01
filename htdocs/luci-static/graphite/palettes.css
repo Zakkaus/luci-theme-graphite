@@ -1,0 +1,503 @@
+/* ─────────────────────────────────────────────────────────────
+   Palettes
+
+   A palette is a set of values, never a set of rules. Every block below
+   re-declares token names the design system already defines and touches no
+   component selector at all — which is why switching one cannot break a
+   layout, and why adding another costs a block of variables rather than a
+   review of the whole stylesheet.
+
+   Names are upstream's own flavour names, because that is the only way a
+   rendering here can be checked against the project that published the
+   colours. Each entry is a light/dark pair: Catppuccin has exactly one light
+   flavour (Latte) and three dark ones, so the pair is named for the dark
+   flavour, which is the part being chosen. Tokyo Night works the same way
+   with Day against Storm and Night.
+
+   Every step is a named upstream colour, not a value derived from one. That
+   distinction is the whole reason this file was rewritten: deriving the card
+   fill as a midpoint between base and surface0 gave Tokyo Night Storm three
+   surfaces inside 0.02 of lightness, and the interface came out flat — no
+   card read as a card. The ladder each project actually publishes is the one
+   to use. In a dark flavour that is bg_dark or mantle for the page, bg or
+   base for a card, bg_highlight or surface0 for anything raised above it; in
+   a light flavour it runs the other way, with the page a step below its own
+   cards.
+
+   --tint-h and --tint-c stay real seeds — hue from the flavour's own base
+   colour and chroma averaged across its surfaces — so the theme's grey-tint
+   control still means something inside a palette.
+
+   Default remains graphite: chroma zero, the achromatic palette the design
+   language argues for.
+   ───────────────────────────────────────────────────────────── */
+
+
+/* Catppuccin — Latte in light, Frappé in dark */
+:root[data-palette="catppuccin-frappe"] {
+  --h-ok: 140;
+  --h-warn: 68;
+  --h-info: 262;
+  --h-bad: 20;
+  --tint-h: 264;
+  --tint-c: 0.0116;
+  --zone-l: 0.857;
+  --zone-c: 0.05;
+  --background: oklch(0.933 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --card: oklch(0.958 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.958 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.906 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.435 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.933 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.906 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.906 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.491 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.857 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --border: oklch(0.808 var(--tint-c) var(--tint-h));
+  --outline-variant: oklch(0.857 var(--tint-c) var(--tint-h));
+  --input: oklch(0.808 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.435 var(--tint-c) var(--tint-h));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="catppuccin-frappe"]:not([data-theme="light"]) {
+    --h-ok: 133;
+    --h-warn: 84;
+    --h-info: 266;
+    --h-bad: 19;
+    --tint-h: 275;
+    --tint-c: 0.0339;
+    --zone-l: 0.46;
+    --zone-c: 0.05;
+    --background: oklch(0.297 var(--tint-c) var(--tint-h));
+    --foreground: oklch(0.862 var(--tint-c) var(--tint-h));
+    --card: oklch(0.329 var(--tint-c) var(--tint-h));
+    --card-foreground: oklch(0.862 var(--tint-c) var(--tint-h));
+    --popover: oklch(0.395 var(--tint-c) var(--tint-h));
+    --popover-foreground: oklch(0.862 var(--tint-c) var(--tint-h));
+    --surface-raised: oklch(0.395 var(--tint-c) var(--tint-h));
+    --primary: oklch(0.862 var(--tint-c) var(--tint-h));
+    --primary-foreground: oklch(0.297 var(--tint-c) var(--tint-h));
+    --secondary: oklch(0.395 var(--tint-c) var(--tint-h));
+    --secondary-foreground: oklch(0.862 var(--tint-c) var(--tint-h));
+    --muted: oklch(0.395 var(--tint-c) var(--tint-h));
+    --muted-foreground: oklch(0.752 var(--tint-c) var(--tint-h));
+    --accent: oklch(0.46 var(--tint-c) var(--tint-h));
+    --accent-foreground: oklch(0.862 var(--tint-c) var(--tint-h));
+    --border: oklch(0.46 var(--tint-c) var(--tint-h));
+    --outline-variant: oklch(0.426 var(--tint-c) var(--tint-h));
+    --input: oklch(0.46 var(--tint-c) var(--tint-h));
+    --ring: oklch(0.862 var(--tint-c) var(--tint-h));
+  }
+}
+
+:root[data-palette="catppuccin-frappe"][data-theme="dark"] {
+  --h-ok: 133;
+  --h-warn: 84;
+  --h-info: 266;
+  --h-bad: 19;
+  --tint-h: 275;
+  --tint-c: 0.0339;
+  --zone-l: 0.46;
+  --zone-c: 0.05;
+  --background: oklch(0.297 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.862 var(--tint-c) var(--tint-h));
+  --card: oklch(0.329 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.862 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.395 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.862 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.395 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.862 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.297 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.395 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.862 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.395 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.752 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.46 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.862 var(--tint-c) var(--tint-h));
+  --border: oklch(0.46 var(--tint-c) var(--tint-h));
+  --outline-variant: oklch(0.426 var(--tint-c) var(--tint-h));
+  --input: oklch(0.46 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.862 var(--tint-c) var(--tint-h));
+}
+
+
+/* Catppuccin — Latte in light, Macchiato in dark */
+:root[data-palette="catppuccin-macchiato"] {
+  --h-ok: 140;
+  --h-warn: 68;
+  --h-info: 262;
+  --h-bad: 20;
+  --tint-h: 264;
+  --tint-c: 0.0116;
+  --zone-l: 0.857;
+  --zone-c: 0.05;
+  --background: oklch(0.933 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --card: oklch(0.958 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.958 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.906 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.435 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.933 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.906 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.906 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.491 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.857 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --border: oklch(0.808 var(--tint-c) var(--tint-h));
+  --outline-variant: oklch(0.857 var(--tint-c) var(--tint-h));
+  --input: oklch(0.808 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.435 var(--tint-c) var(--tint-h));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="catppuccin-macchiato"]:not([data-theme="light"]) {
+    --h-ok: 138;
+    --h-warn: 85;
+    --h-info: 264;
+    --h-bad: 11;
+    --tint-h: 277;
+    --tint-c: 0.0359;
+    --zone-l: 0.426;
+    --zone-c: 0.05;
+    --background: oklch(0.249 var(--tint-c) var(--tint-h));
+    --foreground: oklch(0.871 var(--tint-c) var(--tint-h));
+    --card: oklch(0.279 var(--tint-c) var(--tint-h));
+    --card-foreground: oklch(0.871 var(--tint-c) var(--tint-h));
+    --popover: oklch(0.354 var(--tint-c) var(--tint-h));
+    --popover-foreground: oklch(0.871 var(--tint-c) var(--tint-h));
+    --surface-raised: oklch(0.354 var(--tint-c) var(--tint-h));
+    --primary: oklch(0.871 var(--tint-c) var(--tint-h));
+    --primary-foreground: oklch(0.249 var(--tint-c) var(--tint-h));
+    --secondary: oklch(0.354 var(--tint-c) var(--tint-h));
+    --secondary-foreground: oklch(0.871 var(--tint-c) var(--tint-h));
+    --muted: oklch(0.354 var(--tint-c) var(--tint-h));
+    --muted-foreground: oklch(0.751 var(--tint-c) var(--tint-h));
+    --accent: oklch(0.426 var(--tint-c) var(--tint-h));
+    --accent-foreground: oklch(0.871 var(--tint-c) var(--tint-h));
+    --border: oklch(0.426 var(--tint-c) var(--tint-h));
+    --outline-variant: oklch(0.388 var(--tint-c) var(--tint-h));
+    --input: oklch(0.426 var(--tint-c) var(--tint-h));
+    --ring: oklch(0.871 var(--tint-c) var(--tint-h));
+  }
+}
+
+:root[data-palette="catppuccin-macchiato"][data-theme="dark"] {
+  --h-ok: 138;
+  --h-warn: 85;
+  --h-info: 264;
+  --h-bad: 11;
+  --tint-h: 277;
+  --tint-c: 0.0359;
+  --zone-l: 0.426;
+  --zone-c: 0.05;
+  --background: oklch(0.249 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.871 var(--tint-c) var(--tint-h));
+  --card: oklch(0.279 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.871 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.354 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.871 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.354 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.871 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.249 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.354 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.871 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.354 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.751 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.426 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.871 var(--tint-c) var(--tint-h));
+  --border: oklch(0.426 var(--tint-c) var(--tint-h));
+  --outline-variant: oklch(0.388 var(--tint-c) var(--tint-h));
+  --input: oklch(0.426 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.871 var(--tint-c) var(--tint-h));
+}
+
+
+/* Catppuccin — Latte in light, Mocha in dark */
+:root[data-palette="catppuccin-mocha"] {
+  --h-ok: 140;
+  --h-warn: 68;
+  --h-info: 262;
+  --h-bad: 20;
+  --tint-h: 264;
+  --tint-c: 0.0116;
+  --zone-l: 0.857;
+  --zone-c: 0.05;
+  --background: oklch(0.933 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --card: oklch(0.958 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.958 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.906 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.435 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.933 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.906 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.906 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.491 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.857 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.35 var(--tint-c) var(--tint-h));
+  --border: oklch(0.808 var(--tint-c) var(--tint-h));
+  --outline-variant: oklch(0.857 var(--tint-c) var(--tint-h));
+  --input: oklch(0.808 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.435 var(--tint-c) var(--tint-h));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="catppuccin-mocha"]:not([data-theme="light"]) {
+    --h-ok: 143;
+    --h-warn: 86;
+    --h-info: 260;
+    --h-bad: 3;
+    --tint-h: 284;
+    --tint-c: 0.0303;
+    --zone-l: 0.404;
+    --zone-c: 0.05;
+    --background: oklch(0.216 var(--tint-c) var(--tint-h));
+    --foreground: oklch(0.879 var(--tint-c) var(--tint-h));
+    --card: oklch(0.243 var(--tint-c) var(--tint-h));
+    --card-foreground: oklch(0.879 var(--tint-c) var(--tint-h));
+    --popover: oklch(0.324 var(--tint-c) var(--tint-h));
+    --popover-foreground: oklch(0.879 var(--tint-c) var(--tint-h));
+    --surface-raised: oklch(0.324 var(--tint-c) var(--tint-h));
+    --primary: oklch(0.879 var(--tint-c) var(--tint-h));
+    --primary-foreground: oklch(0.216 var(--tint-c) var(--tint-h));
+    --secondary: oklch(0.324 var(--tint-c) var(--tint-h));
+    --secondary-foreground: oklch(0.879 var(--tint-c) var(--tint-h));
+    --muted: oklch(0.324 var(--tint-c) var(--tint-h));
+    --muted-foreground: oklch(0.751 var(--tint-c) var(--tint-h));
+    --accent: oklch(0.404 var(--tint-c) var(--tint-h));
+    --accent-foreground: oklch(0.879 var(--tint-c) var(--tint-h));
+    --border: oklch(0.404 var(--tint-c) var(--tint-h));
+    --outline-variant: oklch(0.363 var(--tint-c) var(--tint-h));
+    --input: oklch(0.404 var(--tint-c) var(--tint-h));
+    --ring: oklch(0.879 var(--tint-c) var(--tint-h));
+  }
+}
+
+:root[data-palette="catppuccin-mocha"][data-theme="dark"] {
+  --h-ok: 143;
+  --h-warn: 86;
+  --h-info: 260;
+  --h-bad: 3;
+  --tint-h: 284;
+  --tint-c: 0.0303;
+  --zone-l: 0.404;
+  --zone-c: 0.05;
+  --background: oklch(0.216 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.879 var(--tint-c) var(--tint-h));
+  --card: oklch(0.243 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.879 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.324 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.879 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.324 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.879 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.216 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.324 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.879 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.324 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.751 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.404 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.879 var(--tint-c) var(--tint-h));
+  --border: oklch(0.404 var(--tint-c) var(--tint-h));
+  --outline-variant: oklch(0.363 var(--tint-c) var(--tint-h));
+  --input: oklch(0.404 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.879 var(--tint-c) var(--tint-h));
+}
+
+
+/* Tokyo Night — Day in light, Storm in dark */
+:root[data-palette="tokyonight-storm"] {
+  --h-ok: 130;
+  --h-warn: 75;
+  --h-info: 258;
+  --h-bad: 12;
+  --tint-h: 277;
+  --tint-c: 0.0235;
+  --zone-l: 0.814;
+  --zone-c: 0.05;
+  --background: oklch(0.913 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.334 var(--tint-c) var(--tint-h));
+  --card: oklch(0.935 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.334 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.935 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.334 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.883 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.512 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.913 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.835 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.334 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.835 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.476 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.814 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.334 var(--tint-c) var(--tint-h));
+  --border: oklch(0.756 var(--tint-c) var(--tint-h));
+  --outline-variant: oklch(0.835 var(--tint-c) var(--tint-h));
+  --input: oklch(0.756 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.512 var(--tint-c) var(--tint-h));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="tokyonight-storm"]:not([data-theme="light"]) {
+    --h-ok: 130;
+    --h-warn: 75;
+    --h-info: 264;
+    --h-bad: 10;
+    --tint-h: 275;
+    --tint-c: 0.0466;
+    --zone-l: 0.364;
+    --zone-c: 0.05;
+    --background: oklch(0.261 var(--tint-c) var(--tint-h));
+    --foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+    --card: oklch(0.282 var(--tint-c) var(--tint-h));
+    --card-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+    --popover: oklch(0.306 var(--tint-c) var(--tint-h));
+    --popover-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+    --surface-raised: oklch(0.306 var(--tint-c) var(--tint-h));
+    --primary: oklch(0.846 var(--tint-c) var(--tint-h));
+    --primary-foreground: oklch(0.261 var(--tint-c) var(--tint-h));
+    --secondary: oklch(0.306 var(--tint-c) var(--tint-h));
+    --secondary-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+    --muted: oklch(0.306 var(--tint-c) var(--tint-h));
+    --muted-foreground: oklch(0.767 var(--tint-c) var(--tint-h));
+    --accent: oklch(0.364 var(--tint-c) var(--tint-h));
+    --accent-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+    --border: oklch(0.409 var(--tint-c) var(--tint-h));
+    --outline-variant: oklch(0.357 var(--tint-c) var(--tint-h));
+    --input: oklch(0.409 var(--tint-c) var(--tint-h));
+    --ring: oklch(0.846 var(--tint-c) var(--tint-h));
+  }
+}
+
+:root[data-palette="tokyonight-storm"][data-theme="dark"] {
+  --h-ok: 130;
+  --h-warn: 75;
+  --h-info: 264;
+  --h-bad: 10;
+  --tint-h: 275;
+  --tint-c: 0.0466;
+  --zone-l: 0.364;
+  --zone-c: 0.05;
+  --background: oklch(0.261 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+  --card: oklch(0.282 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.306 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.306 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.846 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.261 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.306 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.306 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.767 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.364 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+  --border: oklch(0.409 var(--tint-c) var(--tint-h));
+  --outline-variant: oklch(0.357 var(--tint-c) var(--tint-h));
+  --input: oklch(0.409 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.846 var(--tint-c) var(--tint-h));
+}
+
+
+/* Tokyo Night — Day in light, Night in dark */
+:root[data-palette="tokyonight-night"] {
+  --h-ok: 130;
+  --h-warn: 75;
+  --h-info: 258;
+  --h-bad: 12;
+  --tint-h: 277;
+  --tint-c: 0.0235;
+  --zone-l: 0.814;
+  --zone-c: 0.05;
+  --background: oklch(0.913 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.334 var(--tint-c) var(--tint-h));
+  --card: oklch(0.935 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.334 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.935 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.334 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.883 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.512 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.913 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.835 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.334 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.835 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.476 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.814 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.334 var(--tint-c) var(--tint-h));
+  --border: oklch(0.756 var(--tint-c) var(--tint-h));
+  --outline-variant: oklch(0.835 var(--tint-c) var(--tint-h));
+  --input: oklch(0.756 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.512 var(--tint-c) var(--tint-h));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="tokyonight-night"]:not([data-theme="light"]) {
+    --h-ok: 130;
+    --h-warn: 75;
+    --h-info: 264;
+    --h-bad: 10;
+    --tint-h: 280;
+    --tint-c: 0.0383;
+    --zone-l: 0.332;
+    --zone-c: 0.05;
+    --background: oklch(0.204 var(--tint-c) var(--tint-h));
+    --foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+    --card: oklch(0.226 var(--tint-c) var(--tint-h));
+    --card-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+    --popover: oklch(0.282 var(--tint-c) var(--tint-h));
+    --popover-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+    --surface-raised: oklch(0.282 var(--tint-c) var(--tint-h));
+    --primary: oklch(0.846 var(--tint-c) var(--tint-h));
+    --primary-foreground: oklch(0.204 var(--tint-c) var(--tint-h));
+    --secondary: oklch(0.282 var(--tint-c) var(--tint-h));
+    --secondary-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+    --muted: oklch(0.282 var(--tint-c) var(--tint-h));
+    --muted-foreground: oklch(0.767 var(--tint-c) var(--tint-h));
+    --accent: oklch(0.332 var(--tint-c) var(--tint-h));
+    --accent-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+    --border: oklch(0.409 var(--tint-c) var(--tint-h));
+    --outline-variant: oklch(0.324 var(--tint-c) var(--tint-h));
+    --input: oklch(0.409 var(--tint-c) var(--tint-h));
+    --ring: oklch(0.846 var(--tint-c) var(--tint-h));
+  }
+}
+
+:root[data-palette="tokyonight-night"][data-theme="dark"] {
+  --h-ok: 130;
+  --h-warn: 75;
+  --h-info: 264;
+  --h-bad: 10;
+  --tint-h: 280;
+  --tint-c: 0.0383;
+  --zone-l: 0.332;
+  --zone-c: 0.05;
+  --background: oklch(0.204 var(--tint-c) var(--tint-h));
+  --foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+  --card: oklch(0.226 var(--tint-c) var(--tint-h));
+  --card-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+  --popover: oklch(0.282 var(--tint-c) var(--tint-h));
+  --popover-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+  --surface-raised: oklch(0.282 var(--tint-c) var(--tint-h));
+  --primary: oklch(0.846 var(--tint-c) var(--tint-h));
+  --primary-foreground: oklch(0.204 var(--tint-c) var(--tint-h));
+  --secondary: oklch(0.282 var(--tint-c) var(--tint-h));
+  --secondary-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+  --muted: oklch(0.282 var(--tint-c) var(--tint-h));
+  --muted-foreground: oklch(0.767 var(--tint-c) var(--tint-h));
+  --accent: oklch(0.332 var(--tint-c) var(--tint-h));
+  --accent-foreground: oklch(0.846 var(--tint-c) var(--tint-h));
+  --border: oklch(0.409 var(--tint-c) var(--tint-h));
+  --outline-variant: oklch(0.324 var(--tint-c) var(--tint-h));
+  --input: oklch(0.409 var(--tint-c) var(--tint-h));
+  --ring: oklch(0.846 var(--tint-c) var(--tint-h));
+}

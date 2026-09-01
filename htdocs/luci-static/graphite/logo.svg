@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Graphite: two sheets that have slid past each other. Graphite's layers
+       are held together weakly enough to shear, which is why a pencil writes
+       and why the material lubricates — so the offset is the subject, not a
+       decoration. A single hexagon with a seam through it was drawn first and
+       came out as a hexagon with a thin line in it at every size that matters.
+
+       A favicon inherits no colour, so the fill is stated here and restated
+       for a dark browser chrome. Everywhere the mark is inlined instead, the
+       path takes currentColor from the square it sits in. -->
+  <style>
+    path { fill: #111111; }
+    @media (prefers-color-scheme: dark) { path { fill: #eeeeee; } }
+  </style>
+  <path d="M10.9 1.9 18.8 6.46v4.04H3v-4.04L10.9 1.9Zm-5.7 11.6h15.8v4.04L13.1 22.1l-7.9-4.56V13.5Z"/>
+</svg>

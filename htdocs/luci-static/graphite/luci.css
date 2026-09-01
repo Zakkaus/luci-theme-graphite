@@ -1,0 +1,2202 @@
+/* LuCI adaptation layer. Loads last. Every name here was chosen by luci-base:
+   some appear in the markup its templates emit, others its JavaScript writes
+   at runtime — .spinning, .cbi-input-invalid, [data-tab-active]. This file
+   catches them and maps them onto the design system's tokens.
+
+   Two rules:
+
+   - no colour literals. A rule that needs one means graphite.css is missing
+     a token.
+   - no !important. Bootstrap carries 44, argon 291, liquid 147.
+
+   And one thing that is easy to miss: LuCI's buttons are frequently
+   <div class="btn"> and <a class="btn">, not <button>. */
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+
+.btn,
+.cbi-button,
+button:not(.icon-btn):not([role="radio"]),
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  font: inherit;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-block-size: var(--control-h);
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  /* A button in a flex row stretches unless told not to: the package pager's
+     « and » came out a third of the page wide. */
+  flex: none;
+  transition:
+    transform var(--dur-press) ease,
+    box-shadow var(--dur-hover) ease,
+    border-color var(--dur-hover) ease,
+    background-color var(--dur-press) ease;
+}
+
+.btn:hover:not([aria-disabled="true"]):not(:disabled),
+.cbi-button:hover:not(:disabled):not([aria-disabled="true"]),
+button:not(.icon-btn):not([role="radio"]):hover:not(:disabled):not([aria-disabled="true"]) {
+  transform: translateY(-1px);
+  box-shadow: var(--elev-press);
+}
+.btn:not([aria-disabled="true"]):not(:disabled):active,
+.cbi-button:not([aria-disabled="true"]):not(:disabled):active,
+button:not(.icon-btn):not([aria-disabled="true"]):not(:disabled):active { transform: scale(0.97); }
+
+.cbi-button-positive,
+.cbi-button-apply,
+.cbi-button-save,
+.cbi-button-action,
+.btn.important {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+/* Destructive is an action, not a state, so the default form is outlined.
+   The solid fill is reserved for the confirm inside a dialog, where it is the
+   only red on screen. A device list with five solid red buttons trains a
+   reader to ignore red, and red is the one colour that must stay unignorable. */
+.cbi-button-negative,
+.cbi-button-remove {
+  background: none;
+  border-color: var(--destructive);
+  color: var(--destructive);
+}
+/* Reset discards unsaved edits; nothing on the device changes, so it is not
+   destructive. */
+.cbi-button-reset { background: var(--secondary); color: var(--secondary-foreground); }
+#modal_overlay .cbi-button-negative,
+#modal_overlay .cbi-button-remove {
+  background: var(--destructive);
+  border-color: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.cbi-button-link { background: none; border-color: transparent; text-decoration: underline; text-underline-offset: 0.2em; }
+
+/* The login form disables its button with aria-disabled, not the property. */
+button:disabled, .cbi-button:disabled,
+.btn[aria-disabled="true"], button[aria-disabled="true"], .cbi-button[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Buttons come out of luci-base separated by a single whitespace text node,
+   which collapses to nothing between two inline-flex elements. Every place
+   holding a row of them needs a real gap, or Restart / Stop / Edit / Delete
+   arrive as one four-word slab. */
+.right,
+.cbi-page-actions,
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+/* And luci-base's own 8px left margin has to go with it. Beside the gap it
+   doubled the spacing on a desktop; stacked on a phone it became an 8px
+   indent on the second and third buttons only, so the three actions in one
+   bar had two different left edges. Spacing is the gap's job here. */
+.right > *,
+.cbi-page-actions > *,
+.btn-group > * { margin-inline: 0; }
+.right { justify-content: flex-end; }
+
+/* An actions cell is a table cell: `display: flex` takes it out of the row's
+   layout and every Install button straddled two rows. Spacing comes from a
+   sibling margin rather than a gap that would need flex. */
+.cbi-section-actions,
+.td.cbi-section-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+.cbi-section-actions > * + *,
+.td.cbi-section-actions > * + * { margin-inline-start: var(--sp-2); }
+
+/* Full control height. The small step these once used was for a column that
+   squeezed; the table scrolls instead now, and what the small step left was a
+   32px button marooned in a 170px row, reading as disabled. */
+.td.cbi-section-actions .cbi-button,
+.td.cbi-section-actions .btn,
+.cbi-section-actions .cbi-button,
+.cbi-section-actions .btn {
+  min-block-size: var(--control-h);
+  padding: var(--sp-2) var(--sp-4);
+}
+/* The rule that used to sit here pulled the vertical padding of a row holding
+   full-height buttons down to --sp-2, back when every cell carried --sp-3.
+   The base is --sp-2 now, so it asked for what it already had. */
+
+/* luci-base writes `<input><button>` with only a collapsible whitespace node
+   between them. A margin rather than a gap, because the containers are table
+   cells and inline wrappers whose display must not change. */
+.shell-content input + *,
+.shell-content select + *,
+.shell-content textarea + *,
+.shell-content .cbi-dropdown + *,
+.shell-content .btn + .btn,
+.shell-content .cbi-button + .cbi-button { margin-inline-start: var(--sp-2); }
+
+/* A pager arrow is an icon, not a word: square, and the same size as the
+   icon buttons in the top bar. */
+.shell-content .pager > button,
+.shell-content .pager > .btn,
+.pager > button.btn {
+  inline-size: var(--control-h-sm);
+  min-inline-size: var(--control-h-sm);
+  block-size: var(--control-h-sm);
+  min-block-size: var(--control-h-sm);
+  padding: 0;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Nothing but a whitespace node between the arrow and the count. */
+.shell-content .btn + .text,
+.shell-content .cbi-button + .text,
+.shell-content .text + .btn,
+.shell-content .text + .cbi-button { margin-inline-start: var(--sp-3); }
+
+/* luci-mod-statistics pairs each select with its button inside an inline
+   <span class="nowrap">, so two of them wrapping land with no space between
+   the rows. */
+.shell-content .nowrap:not(.td):not(.th) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-block-end: var(--sp-2);
+}
+
+/* ── Headings ───────────────────────────────────────────────── */
+
+/* LuCI emits bare h2/h3/h4 and this file never claimed them, so every page
+   title and card heading was sized and spaced by the browser's own sheet:
+   1.5em and 1.17em against a 14px body give 21px and 16.4px, and the margins
+   come out at 17.4px and 16.4px. None of those four numbers is on this
+   system's type ladder or its spacing ladder, and because they are em-based
+   they drift again wherever the inherited size differs. That is what "the
+   spacing is wrong" looks like when nobody wrote a rule.
+
+   Placed here, before the sections that follow, so the specific rules further
+   down — the card heading's own bottom margin, the alert's h4 — keep winning
+   at equal specificity. */
+.shell-content :is(h1, h2, h3, h4, h5) {
+  margin-block: 0 var(--sp-3);
+  line-height: var(--lh-title);
+  font-weight: 650;
+}
+.shell-content h1,
+.shell-content h2 { font-size: var(--text-xl); }
+.shell-content h3 { font-size: var(--text-lg); }
+.shell-content h4,
+.shell-content h5 { font-size: var(--text-base); }
+
+/* A heading that follows content needs the space above it that the browser's
+   own margin used to provide. */
+.shell-content * + :is(h2, h3) { margin-block-start: var(--sp-5); }
+.shell-content .cbi-section :is(h2, h3):first-child,
+.shell-content .cbi-map > :is(h2, h3):first-child { margin-block-start: 0; }
+
+/* The page's own text sits on the card's text, not on the card's edge.
+
+   There are two vertical lines on every page: the content column at the card's
+   outer edge, and the card's content one padding step inside it. The page
+   title used to sit on the first and the card's heading on the second, so two
+   bold headings stacked 17px apart read as crooked — and under a light palette
+   the card's border is close enough to its fill that the outer line has
+   nothing on it but the title itself.
+
+   The cards keep the outer line; everything that is page-level text moves in
+   to join the inner one. The tab row goes with them because it is a row of
+   labels, not a surface. */
+/* Stated as "text that is not inside a card", not as a list of the shapes LuCI
+   happens to emit. The shapes were enumerated first — bare under .shell-inner,
+   one <div> down, inside a .cbi-map — and the startup and DNS-proxy pages put
+   their title two <div>s down, so they kept their old indent while everything
+   below them moved. A card's own headings are excluded because the card
+   already supplies this inset as padding. */
+.shell-content :is(h1, h2, h3, .cbi-map-descr, .cbi-section-descr, .cbi-value, .tabs, .cbi-tabmenu):not(.cbi-section *):not(.cbi-page-actions *) {
+  padding-inline: calc(var(--sp-4) + var(--hairline));
+}
+/* The log views are the exception the list above cannot cover. They render a
+   filter row, the log itself and a jump button as bare <div>s under a
+   container that carries an id and no class, so the only things the list
+   reached were the heading and the description — every control sat one card
+   inset to the left of the heading naming it, which a reader sees as the
+   negation label having escaped its row.
+
+   Scoped to that container by id, not to "an unclassed div under the view".
+   The general form was written first and moved cards: a card that happens to
+   sit in such a div takes the inset on its own box, and everything inside it
+   — section titles, labels, table headers — shifts with it. The routes, nlbw
+   and startup pages are where that showed. Both log pages use this same id.
+
+   The description is the one child the list already reached, so it gives its
+   own inset back rather than taking it twice. */
+#content_syslog {
+  padding-inline: calc(var(--sp-4) + var(--hairline));
+}
+#content_syslog > .cbi-section-descr {
+  padding-inline: 0;
+}
+/* The dispatcher's own placeholder, from luci-base's view.ut: a bare <div>
+   that is a direct child of the view node, so the list above misses it the
+   same way. It is the first thing on every page and the last thing a reader
+   sees before the content arrives, so it starting one inset left of the title
+   it appears under is the misalignment most people meet first. */
+#view > .spinning {
+  padding-inline: calc(var(--sp-4) + var(--hairline));
+}
+
+/* ── Feedback ───────────────────────────────────────────────── */
+
+/* Geometry only. The fill is decided at the end of this file — see the
+   "Last word" section — because it has to survive everything that loads
+   after it, and a value here would only be overwritten there. */
+.alert-message {
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-block-end: var(--sp-4);
+}
+/* The state gets a shape, not just a hue: a 3px coloured edge carries the
+   whole difference between "this worked" and "this failed", and gives nothing
+   at all to a reader who cannot separate amber from red.
+
+   mask-image rather than background-image is what makes the icon possible
+   here: a colour baked into a data URI cannot follow a theme, but a mask
+   carries only the shape and takes its colour from background-color, so one
+   set of four shapes serves both schemes and all five palettes.
+
+   Shapes are Lucide (ISC): triangle-alert, octagon-alert, circle-check,
+   info. */
+.alert-message::before {
+  content: "";
+  /* Floated, not absolutely positioned. An absolute icon needs the box to
+     reserve space for it, and a page that sets its own padding — mwan3 does —
+     takes that space away and the icon lands on the page's text. A float
+     carries its own space. */
+  float: inline-start;
+  margin-inline-end: var(--sp-3);
+  margin-block-start: 0.15em;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  background-color: var(--muted-foreground);
+  mask: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'><circle%20cx='12'%20cy='12'%20r='10'/><path%20d='M12%2016v-4'/><path%20d='M12%208h.01'/></svg>") center / contain no-repeat;
+}
+.alert-message.warning::before { background-color: var(--status-warn-fg); mask-image: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'><path%20d='m21.73%2018-8-14a2%202%200%200%200-3.48%200l-8%2014A2%202%200%200%200%204%2021h16a2%202%200%200%200%201.73-3'/><path%20d='M12%209v4'/><path%20d='M12%2017h.01'/></svg>"); }
+.alert-message.error::before,
+.alert-message.danger::before  { background-color: var(--status-bad-fg);  mask-image: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'><path%20d='M12%2016h.01'/><path%20d='M12%208v4'/><path%20d='M15.312%202a2%202%200%200%201%201.414.586l4.688%204.688A2%202%200%200%201%2022%208.688v6.624a2%202%200%200%201-.586%201.414l-4.688%204.688a2%202%200%200%201-1.414.586H8.688a2%202%200%200%201-1.414-.586l-4.688-4.688A2%202%200%200%201%202%2015.312V8.688a2%202%200%200%201%20.586-1.414l4.688-4.688A2%202%200%200%201%208.688%202z'/></svg>"); }
+.alert-message.success::before { background-color: var(--status-ok-fg);   mask-image: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'><circle%20cx='12'%20cy='12'%20r='10'/><path%20d='m9%2012%202%202%204-4'/></svg>"); }
+.alert-message.notice::before,
+.alert-message.info::before    { background-color: var(--status-info-fg); mask-image: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'><circle%20cx='12'%20cy='12'%20r='10'/><path%20d='M12%2016v-4'/><path%20d='M12%208h.01'/></svg>"); }
+
+/* The float has to be cleared, or a short alert's box closes above its own
+   icon. */
+.alert-message::after { content: ""; display: block; clear: both; }
+
+.alert-message h4 { margin-block-end: var(--sp-1); }
+.alert-message p:last-child { margin-block-end: 0; }
+
+/* An alert often carries a program's own output inside a <pre> — cloudflared
+   puts several hundred characters of JSON in one. The rule has to name the
+   <pre>: white-space: pre on the child is what refuses to break, and the
+   child does not report as overflowing, it just makes its parent wide.
+   pre-wrap keeps the author's own line breaks; anywhere is for a JSON blob
+   with no spaces to break at. */
+.alert-message {
+  overflow-x: auto;
+  overflow-wrap: anywhere;
+}
+/* No phone override for mwan3's 240px inline-block alert grid, on purpose.
+   Measured at 440, 360 and 320 it never overflows, it just does not fill —
+   and mwan3.css is dispatched.css, which loads after this file, so beating it
+   needs a .shell-content prefix. That is the line this theme does not cross:
+   the shell belongs to the theme, the content area to the page. */
+
+.alert-message pre {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: var(--text-sm);
+  line-height: var(--lh-latin);
+}
+/* The fill and the border for every status variant are set at the end of this
+   file, where they are the last word. ui.js raises runtime failures with the
+   class "danger", not "error"; both names are mapped down there. */
+
+/* .spinning is two things under one name. On a <p> it is a status line and
+   gets the bar below. On a control it is a busy state — LuCI puts it on the
+   ComboButton while a ping runs — and a control that is working says so by
+   being unavailable, not by growing an extra part. */
+.cbi-dropdown.spinning,
+.btn.spinning,
+.cbi-button.spinning,
+button.spinning {
+  opacity: 0.65;
+  cursor: progress;
+}
+.cbi-dropdown.spinning::before,
+.btn.spinning::before,
+.cbi-button.spinning::before,
+button.spinning::before { content: none; }
+
+.spinning:not(.btn):not(.cbi-button):not(.cbi-dropdown):not(button) {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+  padding: var(--sp-3) 0;
+}
+.spinning::before {
+  content: "";
+  inline-size: 2.5rem;
+  block-size: 2px;
+  flex: none;
+  background: linear-gradient(90deg, var(--border) 40%, var(--foreground) 40%, var(--foreground) 60%, var(--border) 60%);
+  background-size: 250% 100%;
+  animation: graphite-progress 1.1s ease-in-out infinite;
+}
+@keyframes graphite-progress {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+/* Still visible under reduced motion: it has to say something is in flight. */
+@media (prefers-reduced-motion: reduce) {
+  .spinning::before { animation: none; background: var(--border); }
+}
+
+.hidden { display: none; }
+
+/* ── Modal ──────────────────────────────────────────────────── */
+
+/* In the DOM from first paint; luci-base opens it with .modal-overlay-active
+   on the body. Without that switch it is an empty sheet over every page. */
+#modal_overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  /* Flush against the top edge it covers the page title. */
+  padding: var(--sp-7) var(--sp-4) var(--sp-5);
+  overflow-y: auto;
+  background: var(--scrim);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity var(--dur-surface) var(--ease-out), visibility var(--dur-surface);
+}
+body.modal-overlay-active #modal_overlay { visibility: visible; opacity: 1; }
+
+/* Keyed on position, not class: the apply flow puts a rollback countdown in
+   here under a class this file does not know. Whatever lands inside the
+   overlay is a dialog, and a dialog over page content is opaque. */
+#modal_overlay > * {
+  inline-size: 100%;
+  max-inline-size: 46rem;
+  padding: var(--sp-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: var(--elev-3);
+}
+
+/* An alert nested inside a dialog drops its own fill — the dialog is already
+   the surface.
+
+   The child combinator is load-bearing. ui.js displayStatus() does not nest
+   an alert; it puts the alert classes on the dialog node itself, so the
+   waiting overlay is <div class="modal alert-message notice">. A selector
+   arm matching a direct child of the overlay blanks that node's fill, which
+   is what left the apply overlay see-through. */
+#modal_overlay > * > .alert-message {
+  background: none;
+  box-shadow: none;
+  padding-inline: 0;
+  border-block: 0;
+  border-inline-end: 0;
+}
+
+/* The dialog wearing the alert classes stays opaque and takes the status only
+   as an edge. It is also the smallest dialog here — one sentence and a
+   countdown — and a dialog is sized by what is in it. */
+#modal_overlay > .alert-message {
+  max-inline-size: 30rem;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  /* No status spine: a dialog is the only thing on screen, so the stripe has
+     nothing to distinguish it from. */
+  border-inline-start-width: 1px;
+  border-inline-start-color: var(--border);
+}
+#modal_overlay > .alert-message > :first-child { margin-block-start: 0; }
+#modal_overlay > .alert-message > :last-child { margin-block-end: 0; }
+
+/* A .spinning line nested in the dialog: the words at reading size and the
+   bar full width underneath, rather than the small muted note. */
+#modal_overlay > .alert-message .spinning {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--sp-3);
+  padding: 0;
+  color: var(--foreground);
+  font-size: var(--text-base);
+  line-height: var(--lh-cjk);
+  font-variant-numeric: tabular-nums;
+}
+#modal_overlay > .alert-message .spinning::before {
+  /* After the words, not before them. */
+  order: 1;
+  inline-size: auto;
+  block-size: var(--sp-1);
+}
+/* And the same trick one class further on: .spinning also lands on the dialog
+   node, so three rule sets meet on one element and one ::before — the muted
+   note, the status icon, and the dialog. What came out was the note's layout
+   with the notice icon's mask still clipping the bar, so the progress bar
+   rendered as a sliver of an info circle. The dialog wins here. */
+#modal_overlay > .alert-message.spinning {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  color: var(--popover-foreground);
+  font-size: var(--text-base);
+  line-height: var(--lh-cjk);
+  font-variant-numeric: tabular-nums;
+}
+#modal_overlay > .alert-message.spinning::before {
+  /* After the words. */
+  order: 1;
+  float: none;
+  margin: 0;
+  inline-size: auto;
+  block-size: var(--sp-1);
+  /* The shorthand on purpose: it takes the status icon's background-color
+     with it. mask is not part of background and needs naming separately. */
+  background: linear-gradient(90deg, var(--border) 40%, var(--foreground) 40%, var(--foreground) 60%, var(--border) 60%);
+  background-size: 250% 100%;
+  mask: none;
+  animation: graphite-progress 1.1s ease-in-out infinite;
+}
+/* The float clearer would be a third flex item with a gap in front of it. */
+#modal_overlay > .alert-message.spinning::after { content: none; }
+@media (prefers-reduced-motion: reduce) {
+  #modal_overlay > .alert-message.spinning::before {
+    animation: none;
+    background: var(--border);
+  }
+}
+
+#modal_overlay > .alert-message.warning { border-inline-start-color: var(--status-warn-fg); }
+#modal_overlay > .alert-message.error,
+#modal_overlay > .alert-message.danger  { border-inline-start-color: var(--status-bad-fg); }
+#modal_overlay > .alert-message.success { border-inline-start-color: var(--status-ok-fg); }
+/* notice and info keep the neutral edge: hue is for the two outcomes a reader
+   has to act on, not for "something is happening". */
+
+#modal_overlay > * > h4:first-child { margin-block-end: var(--sp-4); }
+/* showModal() always writes an h4 and the apply dialog passes '' for it. An
+   empty heading still reserves its margin. */
+#modal_overlay > * > h4:empty { display: none; }
+#modal_overlay > * > .right { margin-block-start: var(--sp-4); }
+
+/* ── Tooltip ────────────────────────────────────────────────── */
+
+/* The container has to outrank its siblings while the popup is open. The
+   tooltip's own z-index cannot do it: the port card's head carries a filter
+   for the zone tint, and a filter makes a stacking context that traps every
+   z-index inside it. */
+.cbi-tooltip-container { position: relative; }
+.cbi-tooltip-container:hover,
+.cbi-tooltip-container:focus-within { z-index: 120; }
+/* A popover surface, not an inverted one: LuCI fills these with real page
+   furniture — interface badges, zone chips, device icons — drawn for the
+   page's own background. The border and the shadow already say it floats. */
+.cbi-tooltip {
+  position: absolute;
+  /* Pinned. An absolutely positioned element still extends its containing
+     block's scrollable area, and ui.js keeps this one at the end of <body>,
+     so a hidden tooltip gave the page a second vertical scrollbar.
+     showTooltip() writes both offsets inline the moment it opens. */
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 110;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  font-size: var(--text-xs);
+  line-height: var(--lh-latin);
+  box-shadow: var(--elev-3);
+  /* Shrink-to-fit measures against whatever is left of the viewport, so near
+     the right edge the port statistics wrapped to one character per line. */
+  inline-size: max-content;
+  max-inline-size: min(24rem, calc(100vw - var(--sp-6)));
+  /* Those statistics arrive as one string with newlines in it. */
+  white-space: pre-line;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-hover) var(--ease-out), visibility var(--dur-hover);
+}
+/* Two tooltips exist: markup inside a container that appears on hover, and a
+   single node ui.js keeps on the body and moves around. The second one's
+   switch is the inline style attribute — showTooltip() writes it,
+   hideTooltip() removes it. Not the content: the node keeps the last
+   tooltip's text after it is dismissed. */
+.cbi-tooltip[style] { visibility: visible; }
+@media (hover: hover) {
+  .cbi-tooltip-container:hover > .cbi-tooltip:not(:empty) { visibility: visible; opacity: 1; }
+}
+
+/* Whatever LuCI puts inside takes the tooltip's colours rather than the
+   page's: the port status popup's device badges were painting themselves in
+   the page's light surface inside a dark popup. */
+.cbi-tooltip .ifacebadge,
+.cbi-tooltip .ifacebox,
+.cbi-tooltip .ifacebox-head,
+.cbi-tooltip .zonebadge {
+  background: var(--muted);
+  border-color: var(--border);
+  color: inherit;
+}
+
+/* A chip inside a sentence is a word among words: inline-flex swallows the
+   whitespace node that would have spaced it. Both classes are listed because
+   two adjacent chips are usually not the same one — LuCI marks the zone with
+   .zonebadge and the policy with .label. The block margin is for the vertical
+   direction, where a chip is taller than its line box; line-height would
+   space every line in the cell including those with no chip. */
+.td .zonebadge, .td .label,
+.cbi-value-field .zonebadge, .cbi-value-field .label {
+  margin-inline: var(--sp-1);
+  margin-block: var(--sp-1);
+}
+.cbi-tooltip .ifacebox { box-shadow: none; }
+/* One flat run of text and badges, so the badges need their own spacing. */
+.cbi-tooltip .ifacebadge { margin-inline-end: var(--sp-1); }
+
+/* ── Form ───────────────────────────────────────────────────── */
+
+.cbi-map { margin-block-end: var(--sp-5); }
+
+/* passwall puts a lone Save button in a bare <div> above its form, and with
+   only a bottom margin on the map the button sat on the card's top edge. A
+   preceding map is excluded because it already carries that bottom margin. */
+:not(.cbi-map) + .cbi-map { margin-block-start: var(--sp-4); }
+.cbi-map-descr { color: var(--muted-foreground); font-size: var(--text-sm); margin-block-end: var(--sp-4); }
+
+.cbi-section,
+.cbi-section-node {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elev-1);
+  padding: var(--sp-4);
+  margin-block-end: var(--sp-4);
+}
+/* One card, the outermost one; everything inside it is grouping, not surface.
+   CBI nests these freely — a map holds a section, the section a node, the node
+   another node — and a fill and a border at every level put the actual field
+   four frames deep. A frame says "this is the surface the page sits on", and
+   there is one of those per card. */
+.cbi-section .cbi-section,
+.cbi-section .cbi-section-node,
+.cbi-section-node .cbi-section,
+.cbi-section-node .cbi-section-node {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* Two of them in a row need to be told apart, and a line does it. */
+.cbi-section .cbi-section + .cbi-section,
+.cbi-section .cbi-section-node + .cbi-section-node,
+.cbi-section-node .cbi-section-node + .cbi-section-node {
+  margin-block-start: var(--sp-5);
+  padding-block-start: var(--sp-5);
+  border-block-start: 1px solid var(--border);
+}
+/* Otherwise the card's own padding and the node's bottom margin stack, and
+   the frame reads as tighter at the top than at the bottom. */
+.cbi-section > .cbi-section-node:last-child,
+.cbi-section > .cbi-section:last-child { margin-block-end: 0; }
+
+.cbi-section > h3:first-child, .cbi-section > legend { margin-block-end: var(--sp-3); }
+
+/* components.css now drops the legend out of its notch and zeroes the
+   fieldset's own margin, border and padding, so only the type is left here —
+   a legend heads a card the same way an h3 does. */
+.cbi-section > legend {
+  font-size: var(--text-lg);
+  font-weight: 650;
+  line-height: var(--lh-title);
+  color: var(--card-foreground);
+}
+.cbi-section-descr { color: var(--muted-foreground); font-size: var(--text-sm); margin-block-end: var(--sp-3); }
+
+/* One row of a form: label, control, and the sentence explaining it.
+
+   Flex with wrap, not grid: a CBI row does not have a fixed number of
+   children. Some options put a whole nested section in the field, some add a
+   second control, some add nothing. A two-column grid assigns whatever it
+   finds to the next cell, and a description landed in the 13rem label
+   column. */
+.cbi-value {
+  display: flex;
+  flex-wrap: wrap;
+  /* Not baseline: the label and the control have different type sizes and the
+     control carries its own padding, so their baselines do not line up. Both
+     centre themselves inside the same band instead. */
+  align-items: flex-start;
+  gap: var(--sp-2) var(--sp-4);
+  padding: var(--sp-3) 0;
+  border-block-end: 1px solid var(--outline-variant);
+}
+.cbi-value:last-child { border-block-end: 0; }
+
+/* The label reads at the size of the control it names. It was one step below
+   it, which is the same drift the controls themselves had: three type sizes
+   inside one row — label, field and hint — where the row only has two things
+   to say. */
+.cbi-value > .cbi-value-title,
+.cbi-value > label.cbi-value-title {
+  flex: 0 0 13rem;
+  max-inline-size: 100%;
+  min-block-size: var(--control-h);
+  display: flex;
+  align-items: center;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.cbi-value-field {
+  flex: 1 1 18rem;
+  min-inline-size: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* Matches the label's band so a single-line field lines up with its label
+     whatever the control is — select, checkbox, or a bare value. */
+  min-block-size: var(--control-h);
+  gap: var(--sp-2);
+}
+
+/* An option that nests a whole section in its field takes the full width:
+   there is no label column wide enough for a table. */
+.cbi-value > .cbi-section,
+.cbi-value > .cbi-tblsection,
+.cbi-value-field > .cbi-section,
+.cbi-value-field > .cbi-tblsection { flex-basis: 100%; inline-size: 100%; }
+
+/* An <output> is a flex item that shrinks to its content, so the
+   repository-key page offered a 278px box for a PEM certificate. */
+.cbi-value > output,
+.cbi-value-field > output,
+.cbi-value-field output {
+  flex: 1 1 100%;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.cbi-value-description {
+  flex-basis: 100%;
+  min-inline-size: 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  line-height: var(--lh-cjk);
+}
+
+/* Has to out-specify the field rule below, which carries five :not()
+   selectors and writes the border shorthand. */
+.cbi-input-invalid,
+input.cbi-input-invalid:not([type="checkbox"]):not([type="radio"]),
+select.cbi-input-invalid,
+textarea.cbi-input-invalid,
+input.cbi-input-invalid:focus, select.cbi-input-invalid:focus, textarea.cbi-input-invalid:focus {
+  border-color: var(--destructive);
+}
+.cbi-value-error { color: var(--destructive); font-size: var(--text-xs); }
+
+/* Fields. The design system styles [data-slot="input"]; LuCI emits bare
+   elements, so the same box is given to them here. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+select,
+textarea {
+  /* font: inherit, and nothing after it. The design system's controls take the
+     body size; writing --text-sm here put every field one step below the text
+     around it and one step below .cbi-dropdown, which is a <div> and never
+     matched this rule — so a native select and a LuCI dropdown sat side by
+     side in the same row at 13px and 14px. */
+  font: inherit;
+  /* Same height and radius as a button — they sit side by side in every
+     filter row. Fixed, not minimum: a minimum lets each control settle at
+     whatever its own line-height and padding add up to, and a field came out
+     a pixel and a half taller than the button beside it. */
+  block-size: var(--control-h);
+  padding-block: var(--sp-2);
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  /* background-color, not the shorthand: the shorthand also resets
+     background-image, and components.css draws the select's caret with two
+     gradients. */
+  background-color: var(--background);
+  color: var(--foreground);
+  max-inline-size: 100%;
+}
+/* Set apart from the block above because a <select> does not want the same on
+   both sides: components.css reserves the trailing space for its caret. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+textarea {
+  padding-inline: var(--sp-3);
+}
+/* components.css owns the select's appearance. The option list stays here:
+   it is the browser's own window and only color-scheme paints it. */
+select > option { background: var(--background); color: var(--foreground); }
+
+/* Every child, not just the controls: CBI wraps most widgets in a bare <div>,
+   and that wrapper is the flex item whose automatic minimum was holding the
+   row open at its content's width. */
+.cbi-value-field > *,
+.control-group > * {
+  min-inline-size: 0;
+}
+
+/* One width for every single-line field in a form row.
+
+   Left to themselves they have three different sizing rules and no two land
+   on the same number: a text input is 222px from the browser's default `size`
+   attribute, a native <select> is as wide as its widest option — 72px, 112px,
+   153px and 262px on one firewall page — and a .cbi-dropdown carries its own
+   13.125rem floor. Five widths down one column reads as five different
+   controls rather than one form.
+
+   A stated width rather than a minimum. min() against a percentage was tried
+   and silently did nothing: the wrapper CBI puts around each widget is
+   shrink-to-fit, so a percentage resolved against it is treated as zero, and
+   every select fell back to its content width. --field-w is under the field
+   column at every viewport this theme supports, so it never overflows and
+   never needs a percentage to save it.
+
+   A descendant selector, not a child one: CBI's nesting depth varies by
+   widget, and naming the depths left a password field inside a .control-group
+   at 228px while everything beside it was 208. The two exclusions are the
+   controls that belong to another control — a dropdown's "create" row and a
+   dynlist's add row are sized by the control around them. */
+/* Scoped to .shell-content, which is the admin form area. The login panel
+   reuses the same CBI markup inside 24rem, where a field fills the panel
+   instead — and this rule, carrying six :not()s, out-specified the one that
+   said so and left the two login fields at 208px inside a 384px card with a
+   318px button under them. */
+.shell-content .cbi-value-field :is(select, input):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not(.cbi-dropdown *):not(.cbi-dynlist *),
+.shell-content .cbi-value-field .cbi-dropdown:not(.btn):not(.cbi-button) {
+  inline-size: var(--field-w);
+  max-inline-size: 100%;
+}
+.shell-content select { text-overflow: ellipsis; }
+
+/* A read-only field is showing a value, not taking one, so it is allowed to be
+   as wide as the value needs — the local time reads
+   "2026年9月1日 GMT+8 15:07:51" and lost its seconds at the shared width. The
+   floor keeps it lined up with the fields above and below it whenever the
+   value is shorter. */
+.shell-content .cbi-value-field input[readonly]:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not(.cbi-dropdown *):not(.cbi-dynlist *) {
+  /* An <input> never takes its width from its value — auto means the `size`
+     attribute — so field-sizing is the only property that does this. Where it
+     is not supported the floor below is what the field falls back to, which is
+     the width every other field has. */
+  field-sizing: content;
+  inline-size: auto;
+  min-inline-size: var(--field-w);
+  max-inline-size: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--foreground);
+  box-shadow: var(--focus-ring);
+}
+/* A textarea's width comes from cols, and LuCI's log views leave it at the
+   default — the system log rendered at about half the column. */
+textarea {
+  /* A textarea is sized by its rows and by the reader dragging it. */
+  block-size: auto;
+  inline-size: 100%;
+  line-height: var(--lh-latin);
+  font-family: var(--font-mono);
+  resize: vertical;
+}
+.cbi-value-field > textarea,
+.cbi-section > textarea { flex: 1 1 100%; }
+/* A checkbox is punctuation for the label beside it, so it is sized in em and
+   never grows taller than the words it qualifies. The WCAG target minimum is
+   about where a finger lands, not how large the mark is drawn; the block
+   below gives the full tap size where that matters.
+
+   vertical-align is the other half: the default is baseline, which rests the
+   box's bottom edge on the text baseline and lifts it above the line. */
+input[type="checkbox"], input[type="radio"] {
+  inline-size: 1em;
+  block-size: 1em;
+  vertical-align: -0.115em;
+  flex: none;
+}
+/* The touch target, not the drawn box: the box keeps its 1em and the hit
+   area grows around it as a transparent outline. */
+@media (pointer: coarse) {
+  input[type="checkbox"], input[type="radio"] {
+    outline: calc((var(--tap-min) - 1em) / 2) solid transparent;
+    outline-offset: 0;
+  }
+}
+
+/* Anything typed and later compared — an address, a key, a MAC. */
+input[type="text"], input[type="password"], input[type="number"] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The save bar stays reachable rather than scrolling away. */
+.cbi-page-actions {
+  justify-content: flex-end;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--elev-2);
+  position: sticky;
+  inset-block-end: var(--sp-3);
+  margin-block-start: var(--sp-4);
+}
+/* One line at every width, and the primary action is what gives. Wrapping put
+   Save & Apply and Save on one line with Reset alone underneath, and where
+   the break falls depends on the language, so a breakpoint cannot settle it.
+   Stacking all three full width is worse: the menu then opens at the width of
+   the screen and reads as a panel covering the page. */
+/* A floor, not zero. With no floor the primary action shrank until its label
+   had no room at all and the bar showed an unlabelled box with a caret in it —
+   worse than any wrap. The floor is the caret's own width plus four
+   characters, so something of the label always survives; below that the bar
+   wraps, which is the honest last resort. */
+.cbi-page-actions > .cbi-dropdown {
+  flex-shrink: 1;
+  min-inline-size: calc(var(--control-h) + 4ch);
+}
+.cbi-page-actions > .cbi-dropdown > ul:not(.dropdown) { inline-size: auto; }
+/* The label takes its own width and the list around it does the clipping.
+   An ellipsis was tried twice and misfired on a sub-pixel: the browser
+   reports this text's max-content as 77.95px and renders it 78.6px wide, so
+   any box sized to max-content overflows itself by half a pixel and
+   text-overflow fires on a label that fits. Only the closed ComboButton label
+   becomes a block; the open menu's items keep their flex row, which lays out
+   the ones carrying an icon or a checkbox. */
+.cbi-page-actions > .cbi-dropdown > ul:not(.dropdown) > li[display] {
+  display: block;
+  line-height: var(--control-h);
+  inline-size: max-content;
+  max-inline-size: none;
+  text-overflow: clip;
+}
+
+/* ── Dropdown, dynlist, filebrowser ──────────────────────────
+   LuCI's own controls, not native form elements: their behaviour is driven
+   by attributes and classes the base JavaScript writes, so the rules below
+   follow that contract rather than guessing at it. Guessing is how Save &
+   Apply once rendered as an empty frame — the closed state's `li[display]`
+   rule was missing.
+
+   Height comes from --control-h, not --tap-min: the design system's
+   pointer:coarse block raises --control-h for every control at once, and
+   naming --tap-min here makes this one 4px taller than the button beside it
+   on a desktop. */
+
+/* A ComboButton is a button and a dropdown at once, so the bare field rules
+   must not override its action variants. */
+.cbi-dropdown {
+  display: inline-flex;
+  align-items: stretch;
+  position: relative;
+  /* Fixed, for the same reason the fields above are: with only a floor this
+     settled two pixels above the select beside it on the SQM page. A dropdown
+     holding several values is the one case that has to grow. */
+  min-block-size: var(--control-h);
+  max-inline-size: 100%;
+  padding: calc(var(--sp) - var(--sp));
+  /* Same radius as a button and a field: the three sit in a row. */
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease-out),
+    box-shadow var(--dur-hover) var(--ease-out),
+    background-color var(--dur-press) var(--ease-out);
+}
+
+/* The same --field-w every other field takes. This was 13.125rem, two pixels
+   wider, which is not a difference anyone can name and is exactly what a
+   dropdown standing beside a select looks like when they disagree. */
+.cbi-dropdown:not(.btn):not(.cbi-button),
+.cbi-dynlist {
+  min-inline-size: 0;
+  inline-size: var(--field-w);
+  max-inline-size: 100%;
+}
+
+.cbi-dropdown:not(.btn):not(.cbi-button) {
+  border: 1px solid var(--input);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* No font-size of its own. A ComboButton is a button, and it stands in the
+   same bar as the two plain ones — at --text-sm it was the primary action
+   reading a step smaller than the actions beside it. */
+.cbi-dropdown.btn,
+.cbi-dropdown.cbi-button {
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  line-height: var(--lh-control);
+}
+
+.cbi-dropdown.btn.primary,
+.cbi-dropdown.btn.success,
+.cbi-dropdown.btn.info,
+.cbi-dropdown.cbi-button-action,
+.cbi-dropdown.cbi-button-apply,
+.cbi-dropdown.cbi-button-edit,
+.cbi-dropdown.cbi-button-fieldadd,
+.cbi-dropdown.cbi-button-positive,
+.cbi-dropdown.cbi-button-reload,
+.cbi-dropdown.cbi-button-save {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.cbi-dropdown.btn.danger,
+.cbi-dropdown.btn.error,
+/* cbi-button-reset is deliberately absent: the ComboButton copies the
+   selected action's class onto its root, so listing it would paint "discard
+   unsaved edits" as destructive. */
+.cbi-dropdown.cbi-button-negative,
+.cbi-dropdown.cbi-button-remove {
+  border-color: var(--destructive);
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.td > .cbi-dropdown:not(.btn):not(.cbi-button),
+.cbi-dynlist > .add-item > .cbi-dropdown {
+  inline-size: 100%;
+}
+
+/* One ring: the root carries tabindex="0", so the global :focus-visible
+   outline already lands on it. */
+.cbi-dropdown:focus-visible,
+.cbi-dropdown[open] {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: var(--focus-ring);
+}
+
+.cbi-dropdown.cbi-input-invalid:not(.btn):not(.cbi-button),
+.cbi-dropdown.cbi-input-invalid:focus-visible,
+.cbi-dropdown.cbi-input-invalid[open] {
+  border-color: var(--status-bad-line);
+}
+
+.cbi-dropdown.cbi-input-invalid:not([open]) > ul > li {
+  color: var(--status-bad-fg);
+}
+
+.cbi-dropdown[disabled],
+.cbi-dynlist[disabled] {
+  opacity: 0.55;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.cbi-dropdown img {
+  max-block-size: var(--control-h-sm);
+  inline-size: auto;
+}
+
+.cbi-dropdown > ul {
+  display: flex;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  inline-size: 100%;
+  margin: calc(var(--sp) - var(--sp));
+  padding: calc(var(--sp) - var(--sp));
+  list-style: none;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+/* The label's inset is the plain button's padding. It was one step tighter,
+   so the primary action's text started 4px left of the text in the two
+   buttons beside it in the same bar. */
+.cbi-dropdown.btn > ul:not(.dropdown),
+.cbi-dropdown.cbi-button > ul:not(.dropdown) {
+  margin-block: calc(var(--sp) - var(--sp));
+  margin-inline-start: var(--sp-4);
+  margin-inline-end: calc(var(--sp) - var(--sp));
+}
+
+/* The rule that used to sit here zeroed the label's margin while the control
+   was busy, back when .spinning turned it into a bar with its own leading
+   element. It does not any more, and all the rule did was shift the words 12px
+   to the left the moment a ping started — a button that moves when you press
+   it. A busy control changes state, not geometry. */
+
+.cbi-dropdown > ul.preview {
+  display: none;
+}
+
+.cbi-dropdown > .open,
+.cbi-dropdown > .more {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--control-h);
+  align-self: stretch;
+  padding: var(--sp-1);
+  text-align: center;
+  line-height: var(--lh-control);
+}
+
+/* The arrow is a segment of the control, not something sitting inside it. Its
+   outer corners follow the control's own radius and its inner edge is square,
+   because a rounded edge in the middle of a button is a seam; and it runs the
+   full height, or a sliver of fill shows above and below it. */
+.cbi-dropdown.btn > .open,
+.cbi-dropdown.cbi-button > .open {
+  margin-inline-start: 0;
+  border-inline-start: 1px solid currentColor;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  border-start-end-radius: inherit;
+  border-end-end-radius: inherit;
+}
+
+.cbi-dropdown > .more,
+.cbi-dropdown:not(.btn):not(.cbi-button) > ul > li[placeholder] {
+  display: none;
+  color: var(--muted-foreground);
+}
+
+.cbi-dropdown > ul > li {
+  display: none;
+  flex: 1 1 auto;
+  align-items: center;
+  align-self: stretch;
+  min-inline-size: 0;
+  overflow: hidden;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cbi-dropdown > ul.dropdown > li,
+.cbi-dropdown:not(.btn):not(.cbi-button) > ul > li {
+  padding: var(--sp-1) var(--sp-3);
+  color: var(--foreground);
+}
+
+.cbi-dropdown > ul > li .hide-open {
+  display: initial;
+}
+
+.cbi-dropdown > ul > li .hide-close {
+  display: none;
+}
+
+/* `display` numbers the visible labels of a multiple selection, so only the
+   ones after the first need a separator. */
+.cbi-dropdown > ul > li[display]:not([display=0]) {
+  border-inline-start: 1px solid var(--border);
+}
+
+.cbi-dropdown[empty] > ul {
+  max-inline-size: 1px;
+}
+
+.cbi-dropdown > ul > li > form {
+  display: none;
+  margin: calc(var(--sp) - var(--sp));
+  padding: calc(var(--sp) - var(--sp));
+  pointer-events: none;
+}
+
+.cbi-dropdown > ul > li img {
+  margin-inline-end: var(--sp-1);
+  vertical-align: middle;
+}
+
+.cbi-dropdown > ul > li > form > input[type=checkbox] {
+  margin-inline-end: var(--sp-1);
+}
+
+.cbi-dropdown > ul > li input[type=text] {
+  min-block-size: var(--control-h-sm);
+}
+
+.cbi-dropdown[open] > ul.dropdown {
+  display: block;
+  position: absolute;
+  z-index: 110;
+  min-inline-size: 100%;
+  max-inline-size: none;
+  inline-size: auto;
+  overflow-y: auto;
+  /* A menu flush against its button reads as the button having grown. LuCI
+     writes top or bottom inline, so the gap has to be a translation. */
+  transform: translateY(var(--sp-1));
+  padding: var(--sp-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--popover);
+  /* Explicit: this list is a child of the button, and a filled button hands
+     down white text. */
+  color: var(--popover-foreground);
+  box-shadow: var(--elev-3);
+  transition: max-height var(--dur-press) var(--ease-out);
+}
+/* Opening upwards, the gap has to go the other way. */
+.cbi-dropdown[open] > ul.dropdown[style*="bottom"] { transform: translateY(calc(var(--sp-1) * -1)); }
+
+/* Direction and max height are written inline by the JS from the viewport;
+   the theme supplies only the surface and the scroll container. */
+.cbi-dropdown > ul > li[display],
+.cbi-dropdown[open] > ul.preview,
+.cbi-dropdown[open] > ul.dropdown > li,
+.cbi-dropdown[multiple] > ul > li > label,
+.cbi-dropdown[multiple][open] > ul.dropdown > li,
+.cbi-dropdown[multiple][more] > .more,
+.cbi-dropdown[multiple][empty] > .more {
+  display: flex;
+  flex-grow: 1;
+}
+
+.cbi-dropdown[empty] > ul > li,
+.cbi-dropdown[optional][open] > ul.dropdown > li[placeholder] {
+  display: block;
+}
+
+.cbi-dropdown[multiple][open] > ul.dropdown > li > form {
+  display: flex;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li .hide-open {
+  display: none;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li .hide-close {
+  display: initial;
+}
+
+/* No rules between rows: a separator on every row makes a two-item menu look
+   like a table. The fill under the pointer is what separates them. */
+.cbi-dropdown[open] > ul.dropdown > li {
+  min-block-size: var(--control-h-sm);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--radius-md);
+  align-items: center;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li[selected] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* LuCI puts .focus on the selected row the moment the menu opens, so an
+   outline here rings a row nobody navigated to. Fill instead. */
+.cbi-dropdown[open] > ul.dropdown > li.focus {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.cbi-dropdown[open] > ul.dropdown > li[selected].focus {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+@media (hover: hover) {
+  .cbi-dropdown[open] > ul.dropdown > li:hover {
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+  }
+
+  .cbi-dropdown[open] > ul.dropdown > li[selected]:hover {
+    background: var(--muted);
+    color: var(--foreground);
+  }
+}
+
+
+
+.cbi-dropdown[open] > ul.dropdown > li[unselectable] {
+  opacity: 0.7;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li > input.create-item-input:first-child:last-child {
+  inline-size: 100%;
+}
+
+.cbi-dynlist {
+  display: inline-flex;
+  flex-direction: column;
+  min-block-size: var(--control-h-sm);
+}
+
+.cbi-dynlist > .item {
+  position: relative;
+  min-inline-size: 0;
+  min-block-size: var(--control-h-sm);
+  margin-block-end: var(--sp-1);
+  /* The delete strip's width plus a gap: reserving exactly the strip put a
+     base64 blob's characters hard against the hairline. */
+  padding: var(--sp-1) calc(var(--tap-min) + var(--sp-3)) var(--sp-1) var(--sp-2);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  box-shadow: var(--elev-1);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  word-break: break-all;
+  cursor: move;
+  pointer-events: auto;
+  user-select: text;
+}
+
+/* The delete region is the full-height strip on the trailing edge: LuCI's
+   dynlist decides "was this a delete" from the x coordinate alone, and it
+   reads this pseudo-element's computed width to find that edge. Drawing a
+   small button would promise a small target and delete well outside it. It
+   is the mark alone, though — a fill and a border here read as a container
+   that had lost its contents. */
+.cbi-dynlist > .item::after {
+  content: '×';
+  position: absolute;
+  inset-block: calc(var(--sp) - var(--sp));
+  inset-inline-end: calc(var(--sp) - var(--sp));
+  display: grid;
+  place-items: center;
+  min-inline-size: var(--tap-min);
+  color: var(--muted-foreground);
+  font-size: var(--text-md);
+  font-weight: 650;
+  pointer-events: auto;
+  transition: color var(--dur-hover) var(--ease-out);
+}
+@media (hover: hover) {
+  .cbi-dynlist > .item:hover::after { color: var(--destructive); }
+}
+
+/* A key is reference, not reading matter: one line keeps an entry two lines
+   tall instead of four. */
+.cbi-dynlist > .item code {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--muted-foreground);
+}
+
+/* One ring: these carry tabindex="0", so the global outline already lands. */
+.cbi-dynlist > .item:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: var(--focus-ring);
+}
+
+.cbi-dynlist > .item.drag-over,
+.cbi-dynlist > .add-item > .cbi-input-text.drag-over,
+.cbi-dynlist > .add-item > .cbi-button-add.drag-over {
+  border-block-start: 2px solid var(--ring);
+}
+
+.cbi-dynlist > .item.dragging {
+  opacity: 0.5;
+}
+
+.cbi-dynlist > .item > span {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cbi-dynlist > .item.flash {
+    animation: graphite-dynlist-flash var(--dur-enter) var(--ease-out);
+  }
+}
+
+@keyframes graphite-dynlist-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.cbi-dynlist > .add-item {
+  display: flex;
+  gap: var(--sp-1);
+  min-inline-size: 0;
+}
+
+.cbi-dynlist > .add-item > input,
+.cbi-dynlist > .add-item > button {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cbi-dynlist > .add-item > .cbi-button-add {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--border);
+  /* Same radius as the field it stands beside. */
+  border-radius: var(--radius-lg);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  cursor: pointer;
+}
+
+.cbi-dynlist > .add-item > .cbi-dropdown {
+  flex: 1 1 auto;
+  inline-size: 100%;
+}
+
+[data-page=admin-system-admin-sshkeys] .cbi-dynlist {
+  max-inline-size: none;
+}
+
+.cbi-filebrowser {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: var(--field-w);
+  max-inline-size: 100%;
+  block-size: calc(var(--sp) - var(--sp));
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--card-foreground);
+  opacity: 0;
+  transition: opacity var(--dur-surface) var(--ease-out);
+}
+
+.cbi-filebrowser.open {
+  block-size: auto;
+  overflow: visible;
+  opacity: 1;
+}
+
+.cbi-filebrowser > * {
+  max-inline-size: 100%;
+  margin: var(--sp-1) var(--sp-1) calc(var(--sp) - var(--sp));
+  padding: var(--sp-1);
+  overflow: hidden;
+  border-block-end: 1px solid var(--border);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cbi-filebrowser > ul {
+  margin: var(--sp-1) var(--sp-1) calc(var(--sp) - var(--sp));
+  padding: calc(var(--sp) - var(--sp));
+  list-style: none;
+}
+
+.cbi-filebrowser > div {
+  border-block-end: 0;
+}
+
+.cbi-filebrowser a.btn,
+.cbi-filebrowser a.cbi-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--control-h-sm);
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  line-height: var(--lh-control);
+  text-decoration: none;
+  transition:
+    transform var(--dur-press) var(--ease-out),
+    box-shadow var(--dur-hover) var(--ease-out),
+    background-color var(--dur-press) var(--ease-out);
+}
+
+.cbi-filebrowser a.cbi-button-positive,
+.cbi-filebrowser a.cbi-button-save {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.cbi-filebrowser a.cbi-button-negative {
+  border-color: var(--destructive);
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+@media (hover: hover) {
+  .cbi-filebrowser a.btn:hover,
+  .cbi-filebrowser a.cbi-button:hover {
+    box-shadow: var(--elev-press);
+    transform: translateY(-1px);
+  }
+
+  .cbi-filebrowser > ul > li:hover {
+    background: var(--accent);
+  }
+}
+
+.cbi-filebrowser a.btn:active,
+.cbi-filebrowser a.cbi-button:active {
+  transform: scale(0.97);
+}
+
+.cbi-filebrowser .cbi-button-positive {
+  margin-inline-end: var(--sp-1);
+}
+
+.cbi-filebrowser > ul > li {
+  display: flex;
+  flex-direction: row;
+}
+
+.cbi-filebrowser > ul > li > div:first-child {
+  flex: 10;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cbi-filebrowser > ul > li > div:last-child {
+  flex: 3;
+  text-align: end;
+}
+
+.cbi-filebrowser > ul > li > div:last-child > button {
+  margin-block: var(--sp-1);
+  margin-inline-start: var(--sp-1);
+}
+
+.cbi-filebrowser .upload {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: calc(var(--sp-1) * -1);
+  padding-block-end: var(--sp-1);
+  border-block-end: 1px solid var(--border);
+}
+
+.cbi-filebrowser .upload > * {
+  flex: 1;
+  margin: var(--sp-1);
+}
+
+.cbi-filebrowser .upload > .btn {
+  flex-basis: var(--tap-min);
+}
+
+.cbi-filebrowser .upload > div {
+  flex: 10;
+  min-inline-size: 9.375rem;
+}
+
+.cbi-filebrowser .upload > div > input {
+  inline-size: 100%;
+}
+
+/* ── Progress bar ────────────────────────────────────────────
+   The label sits on the bar, so it crosses the edge between a near-black
+   fill and a near-white track and no single colour is readable on both.
+   Difference blending answers that without a second copy of the text: white
+   resolves light over the fill and dark over the track, and a glyph the edge
+   runs through inverts at exactly that point. It holds in both schemes
+   because it inverts whatever is behind it rather than naming a colour.
+
+   isolation keeps the blend inside the bar. Without it the label would blend
+   with the card, and on the pages that put a bar inside a coloured row, with
+   that row's tint.
+
+   The bar clips, so the fill states no radius of its own — a fill that
+   inherited one would round its leading edge in the middle of the track. The
+   old top margin is gone with the label that needed it; the cell's own
+   padding is what separates one row from the next. */
+.cbi-progressbar {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  block-size: 1.375rem;
+  min-inline-size: 10rem;
+}
+.cbi-progressbar > div {
+  block-size: 100%;
+  background: var(--bar-fill);
+  transition: width var(--dur-surface) var(--ease-out);
+}
+.cbi-progressbar::after {
+  content: attr(title);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  mix-blend-mode: difference;
+  color: oklch(1 0 0);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── Tables ─────────────────────────────────────────────────── */
+
+/* The diagnostics page lays three tools out as three cells of one row, and
+   automatic layout sizes each column to its own button label, so the three
+   inputs start at different places. Scoped with :has(): the package list's
+   description column has to keep taking the space it needs. */
+.table:has(.diag-action) { table-layout: fixed; }
+/* The field is full width, so this pair stacks and the horizontal gap given
+   near the top of this file became an indent under it. */
+.td > input + .diag-action {
+  display: block;
+  margin-inline-start: 0;
+  margin-block-start: var(--sp-2);
+}
+
+/* A text input is 222px wide by the browser's default `size`, which with a
+   button beside it overflows the column. */
+.td > input[type="text"],
+.td > input[type="password"] { inline-size: 100%; }
+
+/* LuCI builds most tables out of divs carrying .table/.tr/.th/.td.
+   border-collapse is not optional here: display:table defaults to `separate`,
+   which gives every cell its own border and puts border-spacing between them,
+   so a process list renders as a grid of little boxes instead of a table. */
+.table {
+  display: table;
+  inline-size: 100%;
+  border-collapse: collapse;
+  /* Body size: these tables are the page, and a notch smaller than the prose
+     around them made every status page read as shrunken. Density comes from
+     the row padding instead. */
+  font-size: var(--text-base);
+}
+.tr { display: table-row; }
+/* 横向大于纵向：一行文字的行盒自带行距，等值的内边距看上去就是两边紧、上下松。
+   横向取的是卡片自己的内边距，因为下面那条规则让表格整块出血到卡片边框，
+   单元格要把这一步还回来 —— 文字于是仍然落在卡片内容的那条线上。 */
+.th, .td {
+  display: table-cell;
+  padding: var(--sp-2) var(--sp-4);
+  vertical-align: middle;
+}
+
+/* On the cells, not the row: on the row it could be inset independently of
+   the fill, and the two disagreed. */
+.th, .td { border-block-end: 1px solid var(--border); }
+.th {
+  /* Some of these are div.th and some a real <th>, which the browser
+     centres — a heading takes the alignment of what it names. */
+  text-align: start;
+  font-weight: 600;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  vertical-align: bottom;
+  /* A wrapped heading stops lining up with the data under it. The table
+     already scrolls in its own container, so the width is paid there. */
+  white-space: nowrap;
+}
+.td { font-variant-numeric: tabular-nums; }
+
+/* LuCI marks a row with more detail behind it by putting a literal "#" in the
+   first cell and hanging data-tooltip off it, which reads as leftover markup.
+   The character stays — CSS cannot replace a text node, and it is what a
+   screen reader gets — but on screen it becomes a mark that says so. */
+.td > [data-tooltip] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.15rem;
+  block-size: 1.15rem;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-full);
+  /* Hidden, not removed: the character stays in the accessibility tree. */
+  font-size: 0;
+  color: var(--muted-foreground);
+  cursor: help;
+  transition: color var(--dur-hover) var(--ease-out), border-color var(--dur-hover) var(--ease-out);
+}
+.td > [data-tooltip]::after {
+  content: "i";
+  font: 600 0.6875rem/1 var(--font-mono);
+}
+@media (hover: hover) {
+  .td > [data-tooltip]:hover { color: var(--foreground); border-color: var(--foreground); }
+}
+/* The row fill and the rule between rows are the same band and the text sits
+   inside it. Three things have to hold at once: the rule lines up with
+   something, the fill does not run past the rule, and the text does not touch
+   the edge of the fill. Nothing bleeds to the card edge — the fill and the
+   rule both come off the same cells, and the heading above the table is inset
+   to match the text rather than the band. */
+/* The empty-table message is a real <tr> holding one <td>, so it lands in the
+   first column — and Chinese breaks between any two characters, which made it
+   six lines one character wide. colspan is what this wants and CSS cannot set
+   it; nowrap works instead by widening the column, which costs nothing in a
+   table that is empty. */
+.tr.placeholder > .td {
+  color: var(--muted-foreground);
+  text-align: center;
+  white-space: nowrap;
+  padding: var(--sp-5) var(--sp-3);
+}
+/* No zebra striping: the interface badge fill and the striped row fill are
+   the same token, so a device chip vanished on every other row. Rows are
+   separated by a hairline, and the hover band below tracks the row the reader
+   is actually on. */
+.cbi-rowstyle-2, .tr.cbi-rowstyle-2 { background-color: transparent; }
+
+/* Keyed on what the row contains, not what it is called: a header row has .th
+   and no .td. Excluding .table-titles by name missed the package manager's
+   cbi-section-table-titles. */
+@media (hover: hover) {
+  .table > .tr:has(> .td):not(.placeholder):hover,
+  .cbi-section-table > .tr:has(> .td):not(.placeholder):hover {
+    background-color: var(--surface-raised);
+  }
+}
+/* A table that does not fit scrolls inside its own box. LuCI pins its action
+   column with an inline width, and the remaining columns were squeezed until
+   a four-character Chinese status broke into four lines — Chinese wraps
+   between any two characters, so there is no width at which it gives up and
+   overflows instead. */
+.cbi-section > div:has(> .table),
+.cbi-section-node > div:has(> .table),
+.shell-inner > div:has(> .table) { overflow-x: auto; }
+
+/* CBI's TableSection writes the table straight into the section, so there is
+   no wrapper for the rules above to use. The section can be the scroller
+   itself — unlike .shell-main, where the same move kills the sticky bar. */
+.cbi-section:has(> .table),
+.cbi-section:has(> .cbi-section-node > .table) { overflow-x: auto; }
+
+/* The table bleeds to the card's frame and its cells give the distance back as
+   their own padding, so the text still lands on the card's content line — where
+   the page title, the card heading and every form label already sit — while the
+   row fill runs the full width of the card.
+
+   Three things had to be got right, and each was wrong once:
+
+   All the way, not part of it. Pulling the table out by the cell padding alone
+   left the fill stopping 5px short of the frame, and a hovered row read as
+   crashing into the card. A fill that touches the frame is a full-bleed table;
+   a fill that stops 5px short is a mistake.
+
+   On whatever clips, not on the content inside it. Where CBI wraps the table in
+   a scroller, bleeding the table past that wrapper's box bleeds into the part
+   the wrapper clips — the cell's leading padding was cut away with it and the
+   text came out flush against the fill.
+
+   One level only. The selector list below mirrors the overflow rules above: the
+   section is the scroller when the table is its own child, and in every other
+   shape a <div> is. Naming both the node and the table matched twice on the LXC
+   page and bled 32px, putting the table outside the card.
+
+   The card's own padding cannot be dropped instead — passwall, dhcp and dns put
+   form rows and a table inside one card and those rows need it. Nor does any of
+   this apply to a table inside a form row: dhcp nests a whole .cbi-tblsection in
+   a .cbi-value's field, and that one is already indented by the row it sits in. */
+.cbi-section > .table:not(.cbi-value *),
+.cbi-section > div:has(> .table:not(.cbi-value *)),
+.cbi-section-node > div:has(> .table:not(.cbi-value *)) {
+  margin-inline: calc(var(--sp-4) * -1);
+}
+
+/* A table with no card around it — the package list, the process list — has no
+   card frame to bleed to, so it only makes up the border a card would have
+   drawn. Its text then lands in the same column as everything else. */
+.shell-inner .table:not(.cbi-section *) {
+  margin-inline: var(--hairline);
+}
+/* A whole table section nested inside a form row — the DHCP page puts static
+   leases there. The bleed above excludes anything under .cbi-value, which is
+   right for a table belonging to one field and wrong for this: it is a
+   section that happens to sit in a row, and without the bleed its header text
+   landed one cell padding inside the description above it in the same card.
+   Injected across all 58 pages before it was written here: it moves that
+   table and nothing else. */
+.cbi-value > .cbi-section.cbi-tblsection > .table {
+  margin-inline: calc(var(--sp-4) * -1);
+}
+.table:has([style*="min-width"]) { min-inline-size: max-content; }
+
+/* ── Tabs written by luci-base ──────────────────────────────── */
+
+.cbi-tabmenu {
+  list-style: none;
+  margin: 0 0 var(--sp-4);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  box-shadow: inset 0 -1px 0 var(--border);
+}
+/* An unselected tab is not a disabled tab: weight and the underline carry
+   the difference. */
+.cbi-tabmenu > li > a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--control-h-sm);
+  padding: var(--sp-2) var(--sp-4);
+  color: var(--foreground);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  border-block-end: 2px solid transparent;
+}
+.cbi-tabmenu > li.cbi-tab > a { color: var(--foreground); font-weight: 600; border-block-end-color: var(--foreground); }
+/* `cbi-tab-disabled` is LuCI's name for "not the current tab", not for one
+   that cannot be used. */
+.cbi-tabmenu > li.cbi-tab-disabled > a { color: var(--foreground); }
+[data-tab-active="false"] { display: none; }
+
+/* Both tab rows draw their rule as an inset shadow, and a shadow fills the
+   padding box. The page inset given near the top of this file is padding, so
+   the rule started one inset to the left of the first tab and ended one to
+   the right of the last — a short stub of hairline sitting just before the
+   active tab's underline, which reads as a stray dash rather than as the
+   start of a line. Margin moves the box instead of its inside, so the rule
+   now begins where the tabs begin. The text does not move. */
+.shell-content :is(.tabs, .cbi-tabmenu):not(.cbi-section *):not(.cbi-page-actions *) {
+  padding-inline: 0;
+  margin-inline: calc(var(--sp-4) + var(--hairline));
+}
+
+/* ── Network pages ──────────────────────────────────────────── */
+
+/* The interface card's header carries an inline background from
+   firewall.getZoneColorStyle(): the administrator's own zone colour, so it is
+   data and the theme styles what surrounds it instead.
+
+   The .shell-content prefix is a cascade fix, not a specificity trick: the
+   page's own stylesheet loads after the theme's — header.ut emits
+   dispatched.css last — and luci-mod-network sets its own radius here. */
+.shell-content .ifacebox {
+  display: inline-flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  min-inline-size: 8rem;
+}
+/* The head carries its own top corners. `overflow: hidden` on the box would
+   do it in one line, but the port cards hang their tooltip inside the box. */
+.shell-content .ifacebox-head {
+  border-start-start-radius: var(--radius-md);
+  border-start-end-radius: var(--radius-md);
+  filter: var(--zone-tint);
+}
+/* Only where a zone colour was written; otherwise it is an ordinary head. */
+.shell-content .ifacebox-head[style*="background"] { color: var(--zone-foreground); }
+.shell-content .ifacebox-body:last-child {
+  border-end-start-radius: var(--radius-md);
+  border-end-end-radius: var(--radius-md);
+}
+/* The zone chips on the firewall pages carry the same inline colour. */
+.shell-content .zonebadge[style*="background"] { filter: var(--zone-tint); }
+
+/* ── Zone colour, inside a palette ──────────────────────────── */
+
+/* Under a palette an administrator's zone pastel sits on surfaces it was
+   never picked against. The colour identifies a zone, so it is relocated
+   rather than repainted: the chip takes the theme's raised surface and the
+   zone colour survives as a 4px strip on one edge, painted by
+   background-image over background-color without ever being read.
+
+   Repainting — keeping the hue and taking lightness and chroma from the
+   palette — was tried and failed: at a palette's surface lightness two hues
+   are two shades of mud, and teal and green came out the same olive.
+
+   Which edge depends on the shape, because a background is clipped by the
+   border radius and a strip meeting a rounded corner tapers to a point: a
+   pill tapers symmetrically, a card's top corner made a crescent, so there
+   the colour caps the top instead.
+
+   Scoped to [data-palette]: with no palette the zone pastels are the only
+   colour on the page and are already doing what hue is for. */
+:root[data-palette] .shell-content .zonebadge[style*="--zone-color-rgb"],
+:root[data-palette] .cbi-tooltip .zonebadge[style*="--zone-color-rgb"] {
+  background-image: linear-gradient(to right, transparent 0 4px, var(--surface-raised) 4px);
+  color: var(--foreground);
+  /* Desaturating the strip would take back what was just preserved. */
+  filter: none;
+}
+
+:root[data-palette] .shell-content .ifacebox-head[style*="--zone-color-rgb"] {
+  background-image: linear-gradient(to bottom, transparent 0 4px, var(--surface-raised) 4px);
+  color: var(--foreground);
+  filter: none;
+}
+
+.ifacebox-head {
+  padding: var(--sp-2);
+  background: var(--surface-raised);
+  border-block-end: 1px solid var(--border);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-align: center;
+}
+.ifacebox-body { padding: var(--sp-3); font-size: var(--text-xs); text-align: center; }
+/* luci-mod-status writes style="min-width:70px; max-width:100px" onto a port
+   card whose longest line is a traffic counter — "▲ 176.9 MiB" — which does
+   not fit in 100px at this type scale. This inline style contradicts its own
+   content rather than carrying data, so it is overridden. Raised, not
+   removed: the grid is repeat(auto-fit, minmax(70px, 1fr)) and with no cap a
+   lone port stretched to the width of the page. */
+.shell-content .ifacebox[style*="max-width"] {
+  min-inline-size: 9.5rem;
+  max-inline-size: 13rem !important;
+}
+.ifacebox-body > span,
+.ifacebox-body > .ifacebadge { white-space: nowrap; }
+
+/* The browser gave the zone card's column 250px for a 128px card. The 1% is
+   the standard way to tell a table "as narrow as the content allows". */
+.tr.cbi-section-table-row:has(> .td > .ifacebox) > .td:first-child {
+  inline-size: 1%;
+  white-space: nowrap;
+}
+
+/* .ifacebadge is two things under one name: a device chip on the network
+   pages, and on the firewall rules page a wrapper around plain sentences —
+   "accept packet", "connection state is established". The icon is what tells
+   them apart, so that is what the frame keys on. */
+.ifacebadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-xs);
+}
+
+/* With an icon it is a device chip and gets a frame. */
+.ifacebadge:has(img),
+.ifacebadge:has(svg) {
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  font-family: var(--font-mono);
+}
+
+/* Without one it is a value: a clause, a match, an action. A frame made the
+   rules page a grid of little boxes and no frame made it a wall of text, so a
+   surface instead — the same one `code` takes in prose.
+
+   No hue: knowing accept from drop means matching the rendered string, and a
+   rule keyed on displayed text breaks on the next translation. */
+/* No size of its own: a clause is a word inside the sentence it belongs to,
+   and at --text-sm it read a step below the cell it sat in. */
+.ifacebadge:not(:has(img)):not(:has(svg)) {
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+}
+
+/* Identifiers are compared character by character, so monospace. LuCI marks
+   the field name <var> and the value <strong> or <a>. */
+.ifacebadge var,
+.ifacebadge strong,
+.ifacebadge a { font-family: var(--font-mono); font-style: normal; }
+.ifacebadge var { color: var(--muted-foreground); }
+
+/* The # in front of a rule is the anchor for a tooltip carrying that rule's
+   comment, not part of the rule. A marker, not a chip. */
+.nft-comment {
+  padding: 0;
+  background: none;
+  color: var(--muted-foreground);
+  cursor: help;
+}
+.nft-comment var { font-size: var(--text-xs); }
+
+/* The chain summary states the same kind of value the rows below do — a hook
+   name, a priority — but LuCI marks them as bare <strong>, so they rendered
+   as proportional bold beside identical monospace values. */
+[class*="nft-"] strong,
+[class*="nft-"] var {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A two-line action makes its row taller than the clause beside it, and
+   centring then floats the clause in the middle of it. */
+.nft-rules .td { vertical-align: top; }
+/* A line, not a gap: a gap at this column width reads as two tables. */
+.nft-rules .td:first-child { border-inline-end: 1px solid var(--outline-variant); }
+.nft-rules .td > .ifacebadge { margin-block-end: var(--sp-1); }
+.zonebadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  font-size: var(--text-xs);
+}
+.network-status-table { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+
+/* ── Uncommitted changes ────────────────────────────────────── */
+
+.uci-change-list { font-family: var(--font-mono); font-size: var(--text-sm); }
+
+/* <ins> and <del> are inline, so two consecutive changes ran together into
+   one line — "uci set …'tokyonight'uci del …". */
+.uci-change-list ins,
+.uci-change-list del {
+  display: block;
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--radius-sm);
+  margin-block-end: var(--sp-1);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.uci-change-list ins, .uci-change-legend-label ins { background: var(--status-ok-bg); text-decoration: none; }
+.uci-change-list del, .uci-change-legend-label del { background: var(--status-bad-bg); text-decoration: none; }
+/* The legend swatches stay inline — they are labels, not commands. */
+.uci-change-legend-label ins, .uci-change-legend-label del { display: inline; padding: 0; margin: 0; }
+.uci-change-list var { font-style: normal; color: var(--muted-foreground); }
+
+/* ── Written at runtime ─────────────────────────────────────── */
+
+.dragging { opacity: 0.5; }
+.drag-over-above { border-block-start: 2px solid var(--ring); }
+.drag-over-below { border-block-end: 2px solid var(--ring); }
+
+/* ── The login form ─────────────────────────────────────────── */
+
+/* sysauth.ut reuses LuCI's form markup so authentication plugins can add
+   their fields to it, and the two-column layout leaves 110px for the input
+   inside a 24rem panel. */
+.login-panel .cbi-map,
+.login-panel .cbi-section,
+.login-panel .cbi-section-node {
+  border: 0;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+}
+/* A label and the field it names are one thing; two fields are two things.
+   At --sp-1 inside the pair and --sp-2 between the pairs those two distances
+   were 4px and 16px against a 32px panel inset — the stack read as one
+   undifferentiated run, and neither number belonged to the same rungs the
+   horizontal inset came from. */
+.login-panel .cbi-value { gap: var(--sp-2); padding: 0; border-block-end: 0; }
+.login-panel .cbi-value + .cbi-value { margin-block-start: var(--sp-5); }
+.login-panel .cbi-value-title { min-block-size: 0; }
+.login-panel .cbi-value-field { display: block; }
+.login-panel .cbi-value-field input { inline-size: 100%; }
+.login-panel form > button { inline-size: 100%; min-block-size: var(--control-h); margin-block-start: var(--sp-5); }
+
+/* ── Phone ──────────────────────────────────────────────────── */
+
+@media (max-width: 48rem) {
+  /* A two-column form row has nowhere to go: the label column alone is wider
+     than the screen. */
+  .cbi-value-title { min-block-size: 0; }
+
+  /* Wide tables scroll inside their own container rather than pushing the
+     page sideways. */
+  .cbi-section-table, .table { display: block; overflow-x: auto; }
+
+  .cbi-page-actions { position: static; padding-inline: var(--sp-3); }
+}
+
+/* Below 376px the three actions stop fitting at their comfortable padding.
+   Tightening the two short secondary labels buys back the 32px the primary
+   needs: a narrower Save reads the same, a clipped Save & Apply does not. */
+@media (max-width: 23.5rem) {
+  /* Not the ComboButton — it wears .btn and .cbi-button too, and taking 16px
+     off its sides is taking them off the label this rule exists to protect. */
+  .cbi-page-actions > .btn:not(.cbi-dropdown),
+  .cbi-page-actions > .cbi-button:not(.cbi-dropdown) { padding-inline: var(--sp-2); }
+}
+
+/* ── Indicators ─────────────────────────────────────────────── */
+
+/* luci-base drops these into #indicators as bare spans with nothing between
+   them, so "Refreshing" and "Unsaved Changes: 7" arrive as one word. */
+#indicators {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+#indicators > span, #indicators > a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  /* Operations, not footnotes: the same target as everything else in the
+     bar. */
+  min-block-size: var(--control-h-sm);
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-size: var(--text-sm);
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+/* Unsaved changes is the one indicator that is asking for an action. */
+#indicators > [data-indicator="uci-changes"],
+#indicators > a[href*="changes"] { background: var(--status-warn-bg); color: var(--status-warn-fg); }
+
+/* ── Realtime graphs ─────────────────────────────────────────
+   The only three !important in this file, for the same reason each time:
+   luci-mod-status writes these values inline and an inline style cannot be
+   reached any other way.
+
+   What that markup says is worth reading: the labels are #eee with a dark
+   shadow — drawn for a dark background — inside a container it paints white,
+   where they sit at 1.1:1. This repairs a mismatch in the page's own markup
+   rather than imposing a preference on someone's data.
+
+   The series colours stay untouched. They are the data. */
+.cbi-section div:has(> svg[version]) {
+  background: var(--card) !important;
+  /* The section around it is already a card, and a second border a few pixels
+     inside the first reads as a mistake. */
+  border-color: transparent !important;
+  overflow: hidden;
+  margin-block: var(--sp-4);
+}
+/* Grid lines are hardcoded black, invisible on a dark ground. */
+.cbi-section svg > line { stroke: var(--border) !important; }
+/* Labels are hardcoded #eee, invisible on a light ground. */
+.cbi-section svg > text { fill: var(--foreground) !important; text-shadow: none !important; }
+
+
+/* ── Last word ──────────────────────────────────────────────── */
+
+/* These live at the end of the last stylesheet on purpose: both are things
+   an earlier declaration lost. The notification surface was declared in
+   graphite.css, which this file re-declares at the same specificity, so every
+   notification stayed translucent and the page read through it. The tap size
+   on dropdown options is the same story — the coarse-pointer block earlier in
+   the cascade never reached the li elements LuCI makes clickable at runtime.
+
+   The spine needs its two leading corners square: a 3px edge inside a rounded
+   box is drawn as a crescent tapering to nothing at both ends. */
+.alert-message {
+  background: var(--card);
+  border-inline-start-width: 3px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+/* Each variant repeats the fill: two classes out-specify one, so setting it
+   on .alert-message alone reached none of them. */
+.alert-message.warning { background: var(--card); border-color: var(--border); border-inline-start-color: var(--status-warn-fg); }
+.alert-message.error,
+.alert-message.danger  { background: var(--card); border-color: var(--border); border-inline-start-color: var(--status-bad-fg); }
+.alert-message.success { background: var(--card); border-color: var(--border); border-inline-start-color: var(--status-ok-fg); }
+.alert-message.notice,
+.alert-message.info    { background: var(--card); border-color: var(--border); }
+
+@media (pointer: coarse) {
+  .cbi-dropdown[open] > ul.dropdown > li {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--tap-min);
+  }
+}
+
+
+/* The create row sits side by side on a wide card and stacks on a narrow one,
+   and a margin can only answer one of those. */
+.cbi-section-create {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.cbi-section-create > * + * { margin-inline-start: 0; }
+
+
+/* LuCI pairs a field with its own affordance in a .control-group — the
+   password field and the button that reveals it. The wrapper is a plain
+   block, so the two sit on the text baseline and end up a pixel apart at the
+   top and at the bottom in opposite directions. */
+.control-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.control-group > * + * { margin-inline-start: 0; }
+
+
+
+/* No wrapping on a multiple-selection dropdown, on purpose. Wrapping was
+   tried, to stop a fourth chosen interface being sliced down the middle, and
+   it put every hidden option on its own flex line: an empty control came out
+   130px tall. LuCI already writes "···" when values do not fit, and half a
+   chip costs less than that. */
+
+
+/* CBI asks for five rows, which makes the row 170px tall for a value nobody
+   edits in place. */
+.td > textarea,
+.td textarea {
+  max-block-size: 8.5rem;
+  min-block-size: var(--control-h);
+}
+
+
+.cbi-dropdown:not([multiple]) { block-size: var(--control-h); }

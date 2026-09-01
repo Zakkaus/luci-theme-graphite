@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# Register the three variants, and only ever write a key that is not there yet:
+# a user who already picked a theme must not have that choice replaced by an
+# upgrade. Bootstrap does the same, and the reason is the same.
+
+changed=0
+
+set_opt() {
+	local key=$1
+	local val=$2
+
+	if ! uci -q get "luci.$key" >/dev/null 2>&1; then
+		uci set "luci.$key=$val"
+		changed=1
+	fi
+}
+
+# All three first. The default check below used to sit between them and read a
+# flag that only the first registration had touched, so on a device where
+# Graphite was already registered but the media path had been cleared, the
+# theme registered its two variants and then declined to become the default —
+# and on a fresh install the ordering made the outcome depend on which of the
+# three keys happened to be missing.
+set_opt themes.Graphite /luci-static/graphite
+set_opt themes.GraphiteLight /luci-static/graphite-light
+set_opt themes.GraphiteDark /luci-static/graphite-dark
+
+# Become the default only when nobody has chosen anything, and on a fresh
+# install. Whether the registrations above changed something is a different
+# question from whether a media path exists, and conflating them is what made
+# this conditional wrong.
+if [ "$PKG_UPGRADE" != 1 ] && ! uci -q get luci.main.mediaurlbase >/dev/null 2>&1; then
+	uci set luci.main.mediaurlbase=/luci-static/graphite
+	changed=1
+fi
+
+if [ $changed = 1 ]; then
+	uci commit luci
+fi
+
+exit 0

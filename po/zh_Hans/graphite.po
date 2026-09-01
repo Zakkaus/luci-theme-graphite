@@ -1,0 +1,89 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: luci-graphite\n"
+"MIME-Version: 1.0\n"
+"Language: zh_Hans\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: luci-theme-graphite/htdocs/luci-static/resources/view/graphite/sysauth.js:43
+msgid "Logging in…"
+msgstr "正在登录…"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/footer.ut:21
+msgid "Lua compatibility mode active"
+msgstr "Lua 兼容模式已启用"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:183 luci-theme-graphite/ucode/template/themes/graphite/header.ut:191
+msgid "Navigation"
+msgstr "导航"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:205 luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:25
+msgid "Theme"
+msgstr "主题"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:206 luci-theme-graphite/ucode/template/themes/graphite/header.ut:206 luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:26
+msgid "Auto"
+msgstr "跟随系统"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:209 luci-theme-graphite/ucode/template/themes/graphite/header.ut:209 luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:29
+msgid "Light"
+msgstr "浅色"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:212 luci-theme-graphite/ucode/template/themes/graphite/header.ut:212 luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:32
+msgid "Dark"
+msgstr "深色"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:223
+msgid "No password set!"
+msgstr "未设置密码！"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:224
+msgid "There is no password set on this router. Please configure a root password to protect the web interface."
+msgstr "此路由器尚未设置密码。请为 root 设置密码以保护 Web 管理界面。"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:226
+msgid "Go to password configuration..."
+msgstr "前往密码设置…"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:233
+msgid "System running in recovery (initramfs) mode."
+msgstr "系统正运行在恢复（initramfs）模式。"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:234
+msgid "No changes to settings will be stored and are lost after rebooting. This mode should only be used to install a firmware upgrade"
+msgstr "此模式下所有设置改动都不会保存，重启后即丢失。它只应用于刷写固件升级。"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:236
+msgid "Go to firmware upgrade..."
+msgstr "前往固件升级…"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:243
+msgid "JavaScript required!"
+msgstr "需要 JavaScript！"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/header.ut:244
+msgid "You must enable JavaScript in your browser or LuCI will not work properly."
+msgstr "请在浏览器中启用 JavaScript，否则 LuCI 无法正常工作。"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:41
+msgid "Authorization Required"
+msgstr "需要授权"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:54
+msgid "Invalid username and/or password! Please try again."
+msgstr "用户名或密码错误，请重试。"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:67
+msgid "Username"
+msgstr "用户名"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:73
+msgid "Password"
+msgstr "密码"
+
+#: luci-theme-graphite/ucode/template/themes/graphite/sysauth.ut:113
+msgid "Log in"
+msgstr "登录"
+

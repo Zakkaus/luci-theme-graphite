@@ -1,0 +1,318 @@
+{#
+ Copyright 2026 Zakk <zakk@gentoozh.org>
+ Licensed to the public under the Apache License 2.0.
+
+ The document shell. The class names below — shell, shell-aside, brand, nav,
+ shell-header, shell-content, shell-inner — belong to the design system's
+ shell.css, which is vendored verbatim. This template's job is to emit the
+ structure that stylesheet expects and nothing more.
+
+ The ids are LuCI's and are not negotiable: #maincontent, #indicators,
+ #tabmenu, #modemenu, plus the body's lang_ class and data-page attribute.
+
+ The icons below are Lucide v1.38.0 (ISC), vendored verbatim — menu, monitor,
+ sun, moon. The sidebar's icons come from the same set through
+ menu-graphite.js; the licence is in LICENSES/lucide-ISC.txt.
+-#}
+
+{%
+	import { getuid, getspnam } from 'luci.core';
+	import * as fs from 'fs';
+
+	const boardinfo = ubus.call('system', 'board') ?? {};
+
+	// Which of the three registered media paths this request came through.
+	// That is the device-level default: LuCI already owns the selection UI
+	// and the persistence, so the theme does not build a second one.
+	//
+	// Three states, all three explicit. A theme with only "dark" and "not
+	// dark" cannot say "light regardless of the system", and an unknown value
+	// falls silently into whichever branch is last.
+	const mode = (theme == 'graphite-dark') ? 'dark'
+	           : (theme == 'graphite-light') ? 'light'
+	           : 'auto';
+
+	// The browser chrome colour. There are two of them, because in auto mode
+	// the answer is not known server-side: the page follows the device, so the
+	// bar has to as well. Both carry a media query and the explicit modes pin
+	// both to the same value — a single unconditional tag reported a light bar
+	// over a dark page on every phone that paints it.
+	const barlight = (mode == 'dark') ? '#101010' : '#fbfbfb';
+	const bardark  = (mode == 'light') ? '#fbfbfb' : '#101010';
+
+	const hostname = striptags(boardinfo.hostname ?? '?');
+
+	// Cache buster for the theme's own stylesheets. Without it a browser keeps
+	// the CSS it already has: LuCI versions luci.js and cbi.js this way, but a
+	// theme's sheets carry no version at all, so an edited stylesheet reaches
+	// nobody who has the page open — every change looks like it did nothing.
+	// The newest mtime among the five is the version; a package upgrade moves
+	// it for the same reason an edit does.
+	let assetver = 0;
+	for (let f in [ 'tokens', 'components', 'shell', 'graphite', 'palettes', 'luci' ]) {
+		const st = fs.stat(`/www${media}/${f}.css`);
+		if (st?.mtime > assetver)
+			assetver = st.mtime;
+	}
+
+	// Appearance settings live in a separate package. Reading them here costs
+	// one uci lookup and keeps the theme installable on its own: with no
+	// graphite config present every value below stays null and the stylesheet
+	// never leaves its achromatic default.
+	//
+	const cfg = uci.get_all('graphite', 'appearance') ?? {};
+
+	// A palette is a set of token values; the default is the achromatic one
+	// the design language argues for, and the others come from palettes.css.
+	// Validated against a list rather than passed through: this string goes
+	// into an attribute the stylesheet keys on.
+	const palettes = [ 'catppuccin-frappe', 'catppuccin-macchiato', 'catppuccin-mocha',
+	                   'tokyonight-storm', 'tokyonight-night' ];
+	const palette = index(palettes, cfg.palette ?? '') >= 0 ? cfg.palette : null;
+
+	// What the sidebar says beside the mark. The theme's own name by default:
+	// a hostname makes a weak wordmark — it is lowercase, often abbreviated,
+	// and different on every device, so the one fixed thing in the interface
+	// ends up being the one thing that is never the same twice.
+	//
+	// The hostname stays available because it answers a real question on a
+	// desk with four routers on it: which box is this tab pointed at. Whoever
+	// runs those four picks it; everyone else gets a name that reads as a name.
+	const brand = (cfg.brand ?? '') == 'hostname' ? hostname : 'Graphite';
+	// Same range the form offers, checked as a number rather than as a shape:
+	// the regex alone accepts 999, which is not a hue.
+	let tint_h = match(cfg.tint_hue ?? '', /^[0-9]{1,3}$/) ? +cfg.tint_hue : null;
+
+	if (tint_h !== null && tint_h > 360)
+		tint_h = null;
+	// Format and range are two different checks and only the first one was
+	// here: the regex accepts 0.999, which is a saturated surface rather than
+	// a tint. The form offers 0..0.01 and a hand-written uci value has to mean
+	// the same thing, so the ceiling lives on this side too.
+	let tint_c = match(cfg.tint_chroma ?? '', /^0(\.[0-9]{1,3})?$/) ? +cfg.tint_chroma : null;
+
+	if (tint_c !== null && (tint_c < 0 || tint_c > 0.01))
+		tint_c = null;
+
+	http.prepare_content('text/html; charset=UTF-8');
+-%}
+
+<!DOCTYPE html>
+<html lang="{{ dispatcher.lang }}"{{ mode != 'auto' ? ` data-theme="${mode}"` : '' }}{{ palette ? ` data-palette="${palette}"` : '' }}>
+	<head>
+		<meta charset="utf-8">
+		<title>{{ striptags(`${boardinfo.hostname ?? '?'}${dispatched?.title ? ` | ${_(dispatched.title)}` : ''}`) }}</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="theme-color" id="graphite-bar-light" content="{{ barlight }}" media="(prefers-color-scheme: light)">
+		<meta name="theme-color" id="graphite-bar-dark" content="{{ bardark }}" media="(prefers-color-scheme: dark)">
+		{# Dark Reader would repaint a page that already has a dark theme. #}
+		<meta name="darkreader-lock">
+		{#
+		 The per-browser override on top of the device default, and it runs
+		 here — in the head, before the first stylesheet — or a reader who
+		 chose dark gets a white frame on every page load.
+
+		 It is the only inline script in the theme and it does one thing:
+		 read the stored choice and write the attribute.
+		-#}
+		<script>
+			(function () {
+				var v = null;
+
+				try { v = localStorage.getItem('graphite-theme'); }
+				catch (e) {
+					/* A private window and blocked site data both throw here.
+					   The server-rendered attribute is already a correct
+					   answer, so there is nothing to recover. */
+				}
+
+				/* 'auto' returns too. Auto means "no override of my own", and the
+				   attribute the server rendered is exactly that answer — removing
+				   it turned a device set to graphite-dark into a light page one
+				   reload after the reader asked to follow the device. */
+				if (v !== 'light' && v !== 'dark')
+					return;
+
+				document.documentElement.setAttribute('data-theme', v);
+
+				/* Pin both bar colours, or the phone keeps painting its chrome
+				   from the system setting the reader just overrode. */
+				var c = (v === 'dark') ? '#101010' : '#fbfbfb';
+				var l = document.getElementById('graphite-bar-light');
+				var d = document.getElementById('graphite-bar-dark');
+
+				if (l) l.setAttribute('content', c);
+				if (d) d.setAttribute('content', c);
+			})();
+
+			/* The collapsed sidebar, restored here for the same reason as the
+			   theme: applied after first paint it is a visible jump, and this
+			   one moves every word on the page sideways. */
+			(function () {
+				try {
+					if (localStorage.getItem('graphite-rail') === '1')
+						document.documentElement.setAttribute('data-rail', '');
+				}
+				catch (e) { /* no stored preference is a valid answer */ }
+			})();
+		</script>
+		{#
+		 Five sheets in dependency order. The first three are verbatim copies
+		 of the design system and are never edited in place; graphite.css is
+		 what this project adds on top; luci.css maps luci-base's own DOM onto
+		 all of it.
+		-#}
+		<link rel="stylesheet" href="{{ media }}/tokens.css?v={{ assetver }}">
+		<link rel="stylesheet" href="{{ media }}/components.css?v={{ assetver }}">
+		<link rel="stylesheet" href="{{ media }}/shell.css?v={{ assetver }}">
+		<link rel="stylesheet" href="{{ media }}/graphite.css?v={{ assetver }}">
+		{#
+		 Palettes load after graphite.css so a palette's own re-declarations
+		 win, and they carry one more attribute of specificity than the base
+		 blocks do, so the order of these two lines is not what decides it.
+		-#}
+		<link rel="stylesheet" href="{{ media }}/palettes.css?v={{ assetver }}">
+		<link rel="stylesheet" href="{{ media }}/luci.css?v={{ assetver }}">
+		<link rel="icon" href="{{ media }}/logo.svg" sizes="any">
+		{% if (dispatched?.css): %}
+		<link rel="stylesheet" href="{{ resource }}/{{ dispatched.css }}">
+		{% endif %}
+		{% if (css): %}
+		<style title="text/css">{{ css }}</style>
+		{% endif %}
+		{#
+		 Seeds from luci-app-graphite, emitted only when that package set them.
+		 An unset value writes nothing at all rather than writing a default,
+		 so the token layer's own defaults stay in charge.
+		-#}
+		{% if (tint_h !== null || tint_c !== null): %}
+		<style>:root{
+			{%- if (tint_h !== null): %}--tint-h:{{ tint_h }};{% endif -%}
+			{%- if (tint_c !== null): %}--tint-c:{{ tint_c }};{% endif -%}
+		}</style>
+		{% endif %}
+		<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
+		<script src="{{ resource }}/cbi.js"></script>
+		{#
+		 Guard the translation functions.
+
+		 cbi.js declares _() and N_() as global functions, and a global function
+		 is a writable property of window — so any script that later assigns
+		 window._ replaces LuCI's translator for the whole page. Several browser
+		 extensions inject Underscore, which does exactly that: _('Overview')
+		 then returns a wrapper object instead of a string, every label falls
+		 back to English, and the first view that reaches _(…).format(…) throws
+		 "_(...).format is not a function" and never renders.
+
+		 A property can be made read-only without being configurable, so this
+		 costs nothing and changes nothing for LuCI, which never reassigns
+		 either name. It only makes the later clobbering fail silently, which is
+		 what an injected script overwriting an application's globals deserves.
+		-#}
+		<script>
+			(function () {
+				[ '_', 'N_' ].forEach(function (name) {
+					try {
+						var fn = window[name];
+
+						/* Only LuCI's own. If something already replaced it before
+						   this ran, freezing the replacement would be worse than
+						   leaving it. */
+						if (typeof fn !== 'function' || !/window\.TR/.test(String(fn)))
+							return;
+
+						Object.defineProperty(window, name, { value: fn, writable: false });
+					}
+					catch (e) { /* nothing to protect, and nothing to report */ }
+				});
+			})();
+		</script>
+	</head>
+
+	<body class="lang_{{ dispatcher.lang }}" data-theme-default="{{ mode }}" data-page="{{ entityencode(join('-', length(ctx.request_path) ? ctx.request_path : ctx.path), true) }}">
+		{% if (!blank_page): %}
+		<div class="shell">
+			<aside class="shell-aside" id="sidebar">
+				{#
+				 The mark is a fixed glyph, not the hostname's first letter. An
+				 initial derived from a hostname reads as a stray character —
+				 "G" for gw-lab says nothing, and it changes on every device
+				 while looking like it means something. The name stays the
+				 hostname, because that is the one piece of text saying which
+				 of several devices this tab is pointed at. The glyph is the
+				 theme's own mark, the same one logo.svg carries.
+				-#}
+				<a class="brand" href="{{ dispatcher.build_url('admin') }}">
+					<span class="mark" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.9 1.9 18.8 6.46v4.04H3v-4.04L10.9 1.9Zm-5.7 11.6h15.8v4.04L13.1 22.1l-7.9-4.56V13.5Z"/></svg></span>
+					<span class="name">{{ brand }}</span>
+				</a>
+				<div class="rule"></div>
+				{# menu-graphite.js fills these. They stay in the markup so the
+				   shell has its geometry before the menu request resolves. #}
+				<nav class="nav" id="mainmenu" aria-label="{{ _('Navigation') }}"></nav>
+				<ul id="modemenu" hidden></ul>
+			</aside>
+
+			<div class="shell-main">
+				<header class="shell-header">
+					<div class="hdr-actions">
+						<button class="icon-btn" id="sidebar-toggle" type="button"
+							aria-expanded="false" aria-controls="sidebar" aria-label="{{ _('Navigation') }}">
+							<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/> <path d="M4 12h16"/> <path d="M4 19h16"/></svg>
+						</button>
+						<span class="page-title">{{ dispatched?.title ? _(dispatched.title) : '' }}</span>
+					</div>
+					<div class="hdr-actions">
+						<div id="indicators"></div>
+						{#
+						 Three explicit states. "Follow the system" has to be
+						 one of the choices, or a browser that once picked dark
+						 has no way back to following the device setting.
+						 aria-checked carries the state; the script never
+						 touches a class.
+						-#}
+						<div class="theme-switch" id="theme-switch" role="radiogroup" aria-label="{{ _('Theme') }}">
+							<button class="icon-btn" type="button" role="radio" aria-checked="false" value="auto" title="{{ _('Auto') }}" aria-label="{{ _('Auto') }}">
+								<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/> <line x1="8" x2="16" y1="21" y2="21"/> <line x1="12" x2="12" y1="17" y2="21"/></svg>
+							</button>
+							<button class="icon-btn" type="button" role="radio" aria-checked="false" value="light" title="{{ _('Light') }}" aria-label="{{ _('Light') }}">
+								<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/> <path d="M12 2v2"/> <path d="M12 20v2"/> <path d="m4.93 4.93 1.41 1.41"/> <path d="m17.66 17.66 1.41 1.41"/> <path d="M2 12h2"/> <path d="M20 12h2"/> <path d="m6.34 17.66-1.41 1.41"/> <path d="m19.07 4.93-1.41 1.41"/></svg>
+							</button>
+							<button class="icon-btn" type="button" role="radio" aria-checked="false" value="dark" title="{{ _('Dark') }}" aria-label="{{ _('Dark') }}">
+								<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+							</button>
+						</div>
+					</div>
+				</header>
+
+				<div class="shell-content" id="maincontent">
+					<div class="shell-inner">
+						{% if (getuid() == 0 && getspnam('root')?.pwdp === ''): %}
+							<div class="alert-message warning">
+								<h4>{{ _('No password set!') }}</h4>
+								<p>{{ _('There is no password set on this router. Please configure a root password to protect the web interface.') }}</p>
+								{% if (dispatcher.lookup("admin/system/admin")): %}
+								  <div class="right"><a class="btn" href="{{ dispatcher.build_url("admin/system/admin") }}">{{ _('Go to password configuration...') }}</a></div>
+								{% endif %}
+							</div>
+						{% endif %}
+
+						{% if (boardinfo.rootfs_type == "initramfs"): %}
+							<div class="alert-message warning">
+								<h4>{{ _('System running in recovery (initramfs) mode.') }}</h4>
+								<p>{{ _('No changes to settings will be stored and are lost after rebooting. This mode should only be used to install a firmware upgrade') }}</p>
+								{% if (dispatcher.lookup("admin/system/flash")): %}
+								  <div class="right"><a class="btn" href="{{ dispatcher.build_url("admin/system/flash") }}">{{ _('Go to firmware upgrade...') }}</a></div>
+								{% endif %}
+							</div>
+						{% endif %}
+
+						<noscript>
+							<div class="alert-message warning">
+								<h4>{{ _('JavaScript required!') }}</h4>
+								<p>{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</p>
+							</div>
+						</noscript>
+
+						<div id="tabmenu" hidden></div>
+		{% endif %}

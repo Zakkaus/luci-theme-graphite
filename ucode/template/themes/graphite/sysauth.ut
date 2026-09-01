@@ -1,0 +1,168 @@
+{#
+ Copyright 2026 Zakk <zakk@gentoozh.org>
+ Licensed to the public under the Apache License 2.0.
+
+ The login screen. Two rules decide its shape.
+
+ One: the form is server-rendered and stays a real form. The view module below
+ only moves it into place — it does not call an authentication API of its own,
+ because the dispatcher's session flow and any authentication plugin's extra
+ fields both live on this form.
+
+ Two: the fields are whatever the dispatcher hands over. An authentication
+ challenge can add fields, HTML and scripts; a login page hardcoded to username
+ and password locks out every deployment that uses one.
+-#}
+
+{% include('header', { blank_page: true }) %}
+
+<div class="login">
+	{#
+	 The same three states as the admin shell. A reader who set dark on this
+	 browser should not be handed a white login screen — that is the one page
+	 everyone sees, often at night, and it is served before any session exists.
+	-#}
+	<div class="theme-switch" role="radiogroup" aria-label="{{ _('Theme') }}">
+		<button class="icon-btn" type="button" role="radio" aria-checked="false" value="auto" title="{{ _('Auto') }}" aria-label="{{ _('Auto') }}">
+			<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+		</button>
+		<button class="icon-btn" type="button" role="radio" aria-checked="false" value="light" title="{{ _('Light') }}" aria-label="{{ _('Light') }}">
+			<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+		</button>
+		<button class="icon-btn" type="button" role="radio" aria-checked="false" value="dark" title="{{ _('Dark') }}" aria-label="{{ _('Dark') }}">
+			<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+		</button>
+	</div>
+
+	<div class="login-panel">
+		{#
+		 The login screen is the one page in the interface that says nothing
+		 about the device it belongs to, and it is the page most likely to be
+		 open on the wrong tab — several routers, several sessions, one
+		 password field each. So it answers "which box is this" before it asks
+		 for anything: the hostname as the title, and under the form the model
+		 and firmware release, which is the pair that tells two otherwise
+		 identical devices apart.
+
+		 The board call is made once and reused. It was three separate calls
+		 for three strings.
+		-#}
+		{% const board = ubus.call('system', 'board') ?? {};
+		   const hostname = striptags(board.hostname ?? '?');
+		   const bcfg = uci.get_all('graphite', 'appearance') ?? {};
+		   const brand = (bcfg.brand ?? '') == 'hostname' ? hostname : 'Graphite'; %}
+		<div class="login-head">
+			<span class="mark" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.9 1.9 18.8 6.46v4.04H3v-4.04L10.9 1.9Zm-5.7 11.6h15.8v4.04L13.1 22.1l-7.9-4.56V13.5Z"/></svg></span>
+			<h1>{{ brand }}</h1>
+			<p>{{ _('Authorization Required') }}</p>
+		</div>
+
+		{#
+		 Two independent facts, so two independent blocks. The dispatcher fills
+		 auth_message for a pending plugin before it ever checks the password,
+		 so a wrong password with a second factor enabled produced both — and
+		 an elif chain showed only the plugin's prompt. The reader was told to
+		 enter their one-time code when what had actually failed was the
+		 password.
+		-#}
+		{% if (fuser): %}
+		<div class="alert-message error">
+			{{ _('Invalid username and/or password! Please try again.') }}
+		</div>
+		{% endif %}
+		{% if (auth_message): %}
+		<div class="alert-message{% if (auth_plugin): %} warning{% endif %}">
+			{{ auth_message }}
+		</div>
+		{% endif %}
+
+		<form method="post" class="cbi-map">
+			<div class="cbi-section">
+				<div class="cbi-section-node">
+					<div class="cbi-value">
+						<label class="cbi-value-title" for="luci_username">{{ _('Username') }}</label>
+						<div class="cbi-value-field">
+							<input name="luci_username" id="luci_username" type="text" autocomplete="username" value="{{ entityencode(duser, true) }}">
+						</div>
+					</div>
+					<div class="cbi-value">
+						<label class="cbi-value-title" for="luci_password">{{ _('Password') }}</label>
+						<div class="cbi-value-field">
+							<input name="luci_password" id="luci_password" type="password" autocomplete="current-password">
+						</div>
+					</div>
+					{% if (auth_fields): %}
+						{% for (let field in auth_fields): %}
+							<div class="cbi-value">
+								<label class="cbi-value-title" for="{{ field.name }}">{{ _(field.label ?? field.name) }}</label>
+								<div class="cbi-value-field">
+									<input
+										name="{{ field.name }}"
+										id="{{ field.name }}"
+										type="{{ field.type ?? 'text' }}"
+										{% if (field.placeholder): %}placeholder="{{ field.placeholder }}"{% endif %}
+										{% if (field.inputmode): %}inputmode="{{ field.inputmode }}"{% endif %}
+										{% if (field.pattern): %}pattern="{{ field.pattern }}"{% endif %}
+										{% if (field.maxlength): %}maxlength="{{ field.maxlength }}"{% endif %}
+										{% if (field.autocomplete): %}autocomplete="{{ field.autocomplete }}"{% endif %}
+										{% if (field.required): %}required{% endif %}
+									>
+								</div>
+							</div>
+						{% endfor %}
+					{% endif %}
+					{% if (auth_html): %}
+						<div class="cbi-value">
+							{{ auth_html }}
+						</div>
+					{% endif %}
+					{% if (auth_assets): %}
+						{% for (let asset in auth_assets): %}
+							{% if (asset.type == 'script'): %}
+								<script src="{{ asset.src }}"></script>
+							{% endif %}
+						{% endfor %}
+					{% endif %}
+				</div>
+			</div>
+
+			<button type="submit" class="cbi-button cbi-button-positive">{{ _('Log in') }}</button>
+		</form>
+
+		{#
+		 The nameplate. Not decoration: it is the answer to "is this the right
+		 device", asked by everyone who administers more than one and answered
+		 by nothing else on this page. Model first because it is what
+		 distinguishes two boxes on a shelf, release second because it is what
+		 distinguishes the same box before and after an upgrade. Either line is
+		 skipped when the board does not report it.
+		-#}
+		{% if (board.model || board.release?.description): %}
+		<dl class="login-foot">
+			{% if (brand != hostname): %}
+			<div><dt>{{ _('Hostname') }}</dt><dd>{{ hostname }}</dd></div>
+			{% endif %}
+			{% if (board.model): %}
+			<div><dt>{{ _('Model') }}</dt><dd>{{ striptags(board.model) }}</dd></div>
+			{% endif %}
+			{% if (board.release?.description): %}
+			<div><dt>{{ _('Firmware Version') }}</dt><dd>{{ striptags(board.release.description) }}</dd></div>
+			{% endif %}
+		</dl>
+		{% endif %}
+	</div>
+</div>
+
+{#
+ The view only takes over once L exists, and it is the thing that reports a
+ login in progress. Without JavaScript the form above still submits — the
+ button is a real submit button, not a click handler.
+-#}
+<div id="view" hidden></div>
+<script>
+	L.require('ui').then(function(ui) {
+		ui.instantiateView('graphite.sysauth');
+	});
+</script>
+
+{% include('footer', { blank_page: true }) %}

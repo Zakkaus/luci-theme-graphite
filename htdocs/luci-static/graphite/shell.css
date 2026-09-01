@@ -1,0 +1,115 @@
+/* Application shell: sidebar, top bar, and the phone equivalent.
+   Copied out of the design book so a project can use it without the book.
+   Depends on tokens.css only; every value here comes from a token. */
+
+:root {
+  --sidebar-w: 14rem;      /* w-56 */
+  --header-h: 3.25rem;     /* h-13 前台 */
+  --header-h-admin: 3.5rem;/* h-14 后台 */
+  --content-max: 72rem;    /* max-w-6xl */
+  --bottomnav-h: 4rem;
+}
+
+.shell { display: flex; min-block-size: 22rem; background: var(--background); }
+.shell-aside {
+  inline-size: var(--sidebar-w); flex-shrink: 0; display: flex; flex-direction: column;
+  border-inline-end: var(--hairline) solid var(--border); background: var(--background);
+}
+.shell-aside[data-admin] { background: color-mix(in oklab, var(--card) 50%, transparent); }
+.shell-aside[data-admin] .brand { block-size: var(--header-h-admin); }
+.shell-main { flex: 1; display: flex; flex-direction: column; min-inline-size: 0; }
+.shell-header {
+  block-size: var(--header-h); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--sp-5); border-block-end: var(--hairline) solid var(--border);
+  background: color-mix(in oklab, var(--background) 80%, transparent);
+  backdrop-filter: blur(12px) saturate(1.5);
+  position: sticky; inset-block-start: 0; z-index: 30;
+}
+.shell-content { flex: 1; padding: var(--sp-5); overflow: auto; }
+.shell-inner { max-inline-size: var(--content-max); margin: 0 auto; inline-size: 100%; }
+
+/* The brand block and the top bar are the two halves of one band across the top
+   of the screen, so their height is one token rather than two values that happen
+   to be close. Left to its own padding this block came out about 6px taller than
+   the bar beside it, which puts the product name above the page title and the
+   rule under it below the bar's bottom edge. */
+.brand { display: flex; align-items: center; gap: var(--sp-2);
+  block-size: var(--header-h); box-sizing: border-box;
+  padding-inline: var(--sp-4); padding-block: 0;
+  /* Usually an <a> to the home route, which otherwise takes the browser's
+     default link blue — the one colour this system does not have. */
+  color: inherit; text-decoration: none; }
+.brand .mark {
+  inline-size: 26px; block-size: 26px; border-radius: var(--radius-sm); flex-shrink: 0;
+  background: var(--foreground); color: var(--background);
+  display: grid; place-items: center; font: 700 0.6875rem/1 var(--font-mono);
+}
+.brand .name { font-size: .8rem; font-weight: 700; letter-spacing: -.01em; }
+/* A divider needs room on both sides. With no top margin it sits against the
+   block above it and reads as that block's underline, not as a separator. */
+.rule { block-size: 1px; background: var(--border); margin: var(--sp-3) var(--sp-4); }
+
+.nav { display: flex; flex-direction: column; gap: var(--sp-4); padding: 0 var(--sp-3) var(--sp-4); flex: 1; overflow-y: auto; }
+.nav-group { display: flex; flex-direction: column; gap: var(--sp-2); }
+.nav-label {
+  font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted-foreground); padding: 0 var(--sp-3); margin-block-end: var(--sp-1);
+}
+.nav-item {
+  position: relative; display: flex; align-items: center; gap: var(--sp-3);
+  border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-3);
+  font-size: 0.875rem; color: var(--muted-foreground); text-decoration: none;
+  transition: all .15s ease;
+}
+.nav-item:hover { background: var(--accent); color: var(--foreground); }
+.nav-item[data-active] { background: oklch(from var(--foreground) l c h / 6%); color: var(--foreground); font-weight: 600; }
+/* 激活态那条左轨：3px 宽、16px 高、只圆右边。它是「你在这里」的唯一信号，
+   不靠颜色，所以在两种主题和色觉差异下都成立。 */
+.nav-item[data-active]::before {
+  content: ""; position: absolute; inset-inline-start: 0; inset-block-start: 50%; transform: translateY(-50%);
+  inline-size: 3px; block-size: 16px; border-radius: 0 var(--radius-full) var(--radius-full) 0; background: var(--foreground);
+}
+.ico { inline-size: 1rem; block-size: 1rem; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+.hdr-actions { display: flex; align-items: center; gap: var(--sp-2); }
+.icon-btn {
+  inline-size: 2rem; block-size: 2rem; display: grid; place-items: center;
+  border: none; background: transparent; color: var(--muted-foreground);
+  border-radius: var(--radius-md); cursor: pointer;
+}
+.icon-btn:hover { background: var(--accent); color: var(--foreground); }
+.avatar {
+  inline-size: 2rem; block-size: 2rem; border-radius: var(--radius-full); margin-inline-start: var(--sp-1);
+  background: oklch(from var(--foreground) l c h / 6%); color: var(--foreground);
+  display: grid; place-items: center; font-size: 0.6875rem; font-weight: 600; cursor: pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   外壳 — 手机
+   侧栏收起，底部导航接管主导航，正文底部留出 5rem 给它，
+   并且加上 safe-area，否则在带 home indicator 的机器上最后一行被遮盖。
+   ══════════════════════════════════════════════════════════════════ */
+.phone {
+  inline-size: 22rem; max-inline-size: 100%; border: 1px solid var(--border);
+  border-radius: var(--radius-2xl); overflow: hidden; background: var(--background);
+  display: flex; flex-direction: column; min-block-size: 30rem; position: relative;
+}
+.phone-header {
+  block-size: var(--header-h); display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--sp-4); border-block-end: var(--hairline) solid var(--border);
+  background: color-mix(in oklab, var(--background) 80%, transparent); backdrop-filter: blur(12px);
+}
+.phone-body { flex: 1; padding: var(--sp-4) var(--sp-4) calc(var(--bottomnav-h) + var(--sp-4)); overflow: auto; }
+.bottomnav {
+  position: absolute; inset-inline: 0; inset-block-end: 0; block-size: var(--bottomnav-h);
+  display: grid; grid-auto-flow: column; align-items: center;
+  border-top: 1px solid var(--border);
+  background: color-mix(in oklab, var(--background) 92%, transparent); backdrop-filter: blur(12px);
+  padding-block-end: env(safe-area-inset-bottom, 0);
+}
+.bn-item {
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-1);
+  font-size: 0.6875rem; color: var(--muted-foreground); text-decoration: none; padding: var(--sp-2) 0;
+}
+.bn-item[data-active] { color: var(--foreground); font-weight: 600; }
