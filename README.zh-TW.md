@@ -140,6 +140,31 @@ Catppuccin 的淺色模式使用 Latte，Tokyo Night 使用 Day。切換配色�
 
 </details>
 
+### 強調色
+
+強調色畫介面上表示主要動作與目前位置的部件：主按鈕的底色、焦點環、活動徽標、
+側欄與登入頁的品牌方塊，以及側欄中目前條目的左軌和底色。其餘部分仍是灰階。
+預設不啟用，此時這些部件使用配色自己的中性色。
+
+八個名稱在每套配色下由該配色自己的取值回答，因此強調色始終屬於它所在的那一套：
+Catppuccin 取自各 flavour 自己的強調色表，Tokyo Night 取自
+[folke/tokyonight.nvim](https://github.com/folke/tokyonight.nvim)，
+Graphite 取自一組為純灰介面調過的值。`accent_custom` 接受六位十六進位色碼，
+在任何配色下都優先於名稱選擇。
+
+| 強調色 | 淺色 | 深色 |
+|---|---|---|
+| **Graphite + 藍** | <img src="docs/screenshots/zh-TW/accent-graphite-light.png" width="380"> | <img src="docs/screenshots/zh-TW/accent-graphite-dark.png" width="380"> |
+| **Catppuccin Mocha + 木槿紫** | <img src="docs/screenshots/zh-TW/accent-catppuccin-mocha-light.png" width="380"> | <img src="docs/screenshots/zh-TW/accent-catppuccin-mocha-dark.png" width="380"> |
+| **Tokyo Night + 青** | <img src="docs/screenshots/zh-TW/accent-tokyonight-night-light.png" width="380"> | <img src="docs/screenshots/zh-TW/accent-tokyonight-night-dark.png" width="380"> |
+| **Graphite + 自訂 `#e4572e`** | <img src="docs/screenshots/zh-TW/accent-graphite-custom-light.png" width="380"> | <img src="docs/screenshots/zh-TW/accent-graphite-custom-dark.png" width="380"> |
+
+強調色上的文字不寫死顏色。Graphite 的八個取值按實測對比度反推壓低明度，白字
+穩定達標；Catppuccin 與 Tokyo Night 兩端差別大，深色 flavour 的強調色明度在
+0.85 以上，白字只有 1.3:1，因此由 `contrast-color()` 按實際亮度選黑白。
+`checks/contrast.py` 涵蓋六套配色 × 八個強調色 × 明暗共 96 種組合，按鈕文字
+對按鈕底不低於 4.5:1。
+
 ## 設定
 
 [`luci-app-graphite`](https://github.com/Zakkaus/luci-app-graphite) 增加**系統 → Appearance** 頁面，寫入 `/etc/config/graphite`。
@@ -148,11 +173,17 @@ Catppuccin 的淺色模式使用 Latte，Tokyo Night 使用 Day。切換配色�
 | 選項 | 作用 |
 |---|---|
 | `palette` | 介面使用哪一套表面配色。留空即 Graphite |
+| `accent` | 主按鈕、焦點環、活動徽標與品牌方塊的顏色。八個名稱之一，留空即不啟用 |
+| `accent_custom` | 六位十六進位色碼。在任何配色下都優先於 `accent` |
 | `tint_hue` | 讓所有灰色表面偏向某個色相。取 0 到 360 的色相角，或 `#3b82f6` 這樣的顏色碼 |
 | `tint_chroma` | 灰色向該色相偏移多少。`0` 為中性；超過 `0.01` 就不再讀作灰色，開始與狀態色競爭，因此這是上限 |
 
 淺色與深色模式不寫入這個檔案。右上角的三個按鈕可選擇淺色、深色或跟隨系統，
 選擇保存在瀏覽器內。側邊欄是否收成圖示列也保存在瀏覽器內。
+
+側邊欄按分組摺疊，載入時只展開目前頁所在的一組，點擊分組標題可開合，多組可同時
+展開。裝了服務類套件的裝置上，選單可達七組五十九項、內容高 3196px，全部展開時
+一個螢幕放不下。收成圖示列時摺疊不生效，因為那裡沒有分組標題可點。
 
 <img src="docs/screenshots/zh-TW/rail-dark.png" width="640">
 
