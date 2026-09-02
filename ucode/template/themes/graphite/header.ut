@@ -214,18 +214,24 @@
 		 An unset value writes nothing at all rather than writing a default,
 		 so the token layer's own defaults stay in charge.
 		-#}
-		{% if (tint_h !== null || tint_c !== null || accent_hex !== null): %}
+		{% if (tint_h !== null || tint_c !== null): %}
 		<style>:root{
 			{%- if (tint_h !== null): %}--tint-h:{{ tint_h }};{% endif -%}
 			{%- if (tint_c !== null): %}--tint-c:{{ tint_c }};{% endif -%}
-			{#- A hand-written accent arrives as six hex digits and is emitted
-			    as written. Everything derived from it — the readable
-			    foreground, the 12% tint behind the current menu item — is
-			    computed in CSS from this one value, so there is nothing here
-			    for the template to get wrong. The regex above is what keeps
-			    a uci value from reaching this line as anything else. -#}
-			{%- if (accent_hex !== null): %}--primary:{{ accent_hex }};{% endif -%}
 		}</style>
+		{% endif %}
+		{#- A hand-written accent arrives as six hex digits and is emitted as
+		    written; everything derived from it is computed in CSS from this one
+		    value. The selector has to out-specify whatever declares --primary
+		    underneath it, and that is not one thing: the default palette
+		    declares it at (0,2,0) in its dark blocks, and a named palette at
+		    (0,3,0) in its own. So the palette's attribute goes into the
+		    selector when there is one, which matches those and wins on order.
+		    Written as a bare :root the colour applied in light mode and was
+		    silently dropped in dark — under a palette it was dropped in dark
+		    even after the first fix. -#}
+		{% if (accent_hex !== null): %}
+		<style>:root{{ palette ? `[data-palette="${palette}"]` : '' }}[data-accent="custom"]{--primary:{{ accent_hex }};}</style>
 		{% endif %}
 		<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
 		<script src="{{ resource }}/cbi.js"></script>

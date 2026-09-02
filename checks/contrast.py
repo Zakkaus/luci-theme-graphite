@@ -165,6 +165,28 @@ try:
             if row['比'] < UI_MIN:
                 bad.append(f"  {row['配色']:22} {row['强调色']:10} {row['明暗']:5} "
                            f"按钮文字 {row['比']} < {UI_MIN}")
+
+        # 自定义色号。它不走 accents.css 的具名规则，而是由模板写进行内样式，
+        # 因此上面那一轮扫不到它——而它恰恰是最容易被压掉的一个：配色在自己的深色
+        # 块里重新声明 --primary，特异度比一个裸 :root 高，颜色在浅色下生效、
+        # 在深色下静静消失。这里逐套配色、逐个明暗，验它确实是使用者填的那一个。
+        HEX, RGB = "#e4572e", "rgb(228, 87, 46)"
+        set_accent("")
+        for name, value in PALETTES:
+            set_palette(value)
+            subprocess.run(RSH + [f"uci set graphite.appearance.accent_custom='{HEX}'; "
+                                  "uci commit graphite"], check=True, capture_output=True)
+            for scheme in ("light", "dark"):
+                pg.emulate_media(color_scheme=scheme)
+                pg.goto(B + "/admin/status/overview", wait_until="networkidle")
+                pg.wait_for_timeout(1200)
+                got = pg.evaluate("() => getComputedStyle("
+                                  "document.querySelector('.brand .mark')).backgroundColor")
+                if got != RGB:
+                    bad.append(f"  {name:22} {'custom':10} {scheme:5} "
+                               f"标记底 {got} 不是填入的 {HEX}")
+        subprocess.run(RSH + ["uci -q delete graphite.appearance.accent_custom; "
+                              "uci commit graphite"], check=True, capture_output=True)
         ctx.close()
         set_accent("")
         br.close()
