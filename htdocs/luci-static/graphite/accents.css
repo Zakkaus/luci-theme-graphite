@@ -49,7 +49,8 @@
    它在浅色强调色上会正确地选黑字；但标记不是文字，它是这个产品的记号，白色是它
    唯一的样子——一个时黑时白的记号已经不是同一个记号。它带 aria-hidden，读者
    永远不需要辨认它的形状来取得信息。 */
-:root[data-accent] .brand .mark { background: var(--primary); color: oklch(1 0 0); }
+:root[data-accent] .brand .mark,
+:root[data-accent] .login-head .mark { background: var(--primary); color: oklch(1 0 0); }
 :root[data-accent] .nav-item[data-active] { background: oklch(from var(--primary) l c h / 12%); }
 :root[data-accent] .nav-item[data-active]::before { background: var(--primary); }
 
