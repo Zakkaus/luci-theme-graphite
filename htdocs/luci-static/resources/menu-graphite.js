@@ -22,6 +22,10 @@
  * Vendored verbatim: each entry below is the inner markup of the icon's own
  * SVG file, unmodified. The licence is in LICENSES/lucide-ISC.txt.
  *
+ * door-open was taken from v1.39.0 rather than v1.38.0. The two releases were
+ * compared on globe, an icon this file already carried, and its markup is
+ * identical across them; the rest of the set stays at v1.38.0.
+ *
  * Stroke width comes from the set (2), not from the design system's .ico
  * default of 1.75: a stroke width is part of an icon set's geometry, and
  * changing it is the first step towards a set nobody can re-sync.
@@ -37,6 +41,7 @@ const LUCIDE = {
 	'dot': '<circle cx="12" cy="12" r="1"/>',
 	'gauge': '<path d="m12 14 4-4"/> <path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
 	'globe': '<circle cx="12" cy="12" r="10"/> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/> <path d="M2 12h20"/>',
+	'door-open': '<path d="M11 20H2" /> <path d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z" /> <path d="M11 4H8a2 2 0 0 0-2 2v14" /> <path d="M14 12h.01" /> <path d="M22 20h-3" />',
 	'hard-drive': '<path d="M10 16h.01"/> <path d="M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/> <path d="M21.946 12.013H2.054"/> <path d="M6 16h.01"/>',
 	'hard-drive-download': '<path d="M12 2v8"/> <path d="m16 6-4 4-4-4"/> <rect width="20" height="8" x="2" y="14" rx="2"/> <path d="M6 18h.01"/> <path d="M10 18h.01"/>',
 	'key-round': '<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/> <circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>',
@@ -74,7 +79,6 @@ const LUCIDE = {
 	'monitor-play': '<path d="M15.033 9.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56V7.648a.645.645 0 0 1 .967-.56z"/> <path d="M12 17v4"/> <path d="M8 21h8"/> <rect x="2" y="3" width="20" height="14" rx="2"/>',
 	'badge-check': '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/> <path d="m9 12 2 2 4-4"/>',
 	'globe-lock': '<path d="M15.686 15A14.5 14.5 0 0 1 12 22a14.5 14.5 0 0 1 0-20 10 10 0 1 0 9.542 13"/> <path d="M2 12h8.5"/> <path d="M20 6V4a2 2 0 1 0-4 0v2"/> <rect width="8" height="5" x="14" y="6" rx="1"/>',
-	'shuffle': '<path d="m18 14 4 4-4 4"/> <path d="m18 2 4 4-4 4"/> <path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/> <path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/> <path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/>',
 	'heart-pulse': '<path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/> <path d="M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>',
 	'radio-tower': '<path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/> <path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/> <circle cx="12" cy="9" r="2"/> <path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/> <path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/> <path d="M9.5 18h5"/> <path d="m8 22 4-11 4 11"/>',
 	'shield-half': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/> <path d="M12 22V2"/>',
@@ -159,22 +163,23 @@ const ICON_FOR = {
 
 	/* 代理与隧道。这一类在真实设备上是最常见的第三方包，落点写全了
 	   才不会让侧边栏出现一排一模一样的兜底图标。 */
-	openclash: 'shuffle',
-	clash: 'shuffle',
-	nikki: 'shuffle',
-	mihomo: 'shuffle',
-	v2raya: 'shuffle',
-	v2ray: 'shuffle',
-	xray: 'shuffle',
-	passwall: 'shuffle',
-	passwall2: 'shuffle',
-	shadowsocksr: 'shuffle',
-	ssr: 'shuffle',
-	'ssr-plus': 'shuffle',
-	shadowsocks: 'shuffle',
-	singbox: 'shuffle',
-	'sing-box': 'shuffle',
-	homeproxy: 'shuffle',
+	openclash: 'door-open',
+	clash: 'door-open',
+	nikki: 'door-open',
+	mihomo: 'door-open',
+	v2raya: 'door-open',
+	v2ray: 'door-open',
+	xray: 'door-open',
+	passwall: 'door-open',
+	passwall2: 'door-open',
+	shadowsocksr: 'door-open',
+	ssr: 'door-open',
+	'ssr-plus': 'door-open',
+	shadowsocks: 'door-open',
+	singbox: 'door-open',
+	'sing-box': 'door-open',
+	homeproxy: 'door-open',
+	honk: 'door-open',
 	frpc: 'waypoints',
 	frps: 'waypoints',
 	cloudflared: 'cloud',
@@ -196,7 +201,7 @@ const ICON_FOR = {
 	dockerman: 'container',
 	docker: 'container',
 	filemanager: 'folder-open',
-	openclash_ext: 'shuffle',
+	openclash_ext: 'door-open',
 	watchcat: 'timer',
 	ttl: 'timer',
 	unbound: 'globe',
@@ -320,11 +325,56 @@ return baseclass.extend({
 				group.name
 			));
 
-			host.appendChild(E('div', { 'class': 'nav-group' }, [
-				E('div', { 'class': 'nav-label' }, [ _(group.title) ]),
-				...items,
-			]));
+			/* Collapsed unless it holds the current page. Four groups with
+			 * twenty-five items measured 1368px of nav against a 900px
+			 * viewport on a GL-BE9300, and seven groups with fifty-nine items
+			 * measured 3196px on a box with services installed — at that
+			 * length every entry is at the same volume and the eye has nowhere
+			 * to land. material (menu-material.js:47) and openwrt-2020
+			 * (menu-openwrt2020.js:35) both keep one group open for the same
+			 * reason. The state is an attribute on the group rather than
+			 * `hidden` on each item so the rail, which hides the labels and
+			 * therefore offers no way to expand, can ignore it in CSS. */
+			const label = E('div', {
+				'class': 'nav-label',
+				'role': 'button',
+				'tabindex': '0',
+				'aria-expanded': isCurrentGroup ? 'true' : 'false',
+			}, [ _(group.title) ]);
+
+			/* A div with a role rather than a real button: shell.css styles
+			 * .nav-label, and a <button> brings the UA's own font with it,
+			 * which lands as weight 400 against the 600 the heading is set in.
+			 * The role and tabindex cost nothing visually and keep it operable
+			 * from the keyboard. */
+			label.addEventListener('click', () => this.toggleGroup(label));
+			label.addEventListener('keydown', (ev) => {
+				if (ev.key !== 'Enter' && ev.key !== ' ')
+					return;
+
+				ev.preventDefault();
+				this.toggleGroup(label);
+			});
+
+			host.appendChild(E('div', {
+				'class': 'nav-group',
+				'data-collapsed': isCurrentGroup ? null : '',
+			}, [ label, ...items ]));
 		});
+	},
+
+	/* Each group opens and closes on its own. material (menu-material.js:47)
+	 * and openwrt-2020 (menu-openwrt2020.js:35) close the others so the nav is
+	 * always one screen, but that also takes away the arrangement someone set
+	 * up — two groups they move between — and puts it back on every click.
+	 * Opening what you need is the reader's call; the group holding the current
+	 * page is open to begin with so the common case costs nothing. */
+	toggleGroup(label) {
+		const group = label.parentNode;
+		const opening = group.hasAttribute('data-collapsed');
+
+		group.toggleAttribute('data-collapsed', !opening);
+		label.setAttribute('aria-expanded', opening ? 'true' : 'false');
 	},
 
 	renderTabMenu(tree, url, level) {
