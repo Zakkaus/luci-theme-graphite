@@ -7,8 +7,7 @@
 
 # Graphite
 
-**OpenWrt 的 LuCI 主题**，包名 `luci-theme-graphite`。<br>
-洗尽铅华。
+**OpenWrt 的 LuCI 主题**，`luci-theme-graphite`。
 
 [English](README.md) · 简体中文 · [繁體中文](README.zh-TW.md)
 

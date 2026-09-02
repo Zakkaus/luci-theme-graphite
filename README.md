@@ -7,7 +7,7 @@
 
 # Graphite
 
-**A LuCI theme for OpenWrt**, packaged as `luci-theme-graphite`.
+**A LuCI theme for OpenWrt**, `luci-theme-graphite`.
 
 English · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
 
