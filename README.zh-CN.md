@@ -20,10 +20,8 @@
 ![概览](docs/screenshots/zh-CN/graphite-overview-light.png)
 
 > [!TIP]
-> **配色、强调色与品牌名要在界面里改，需要另装一个包。**
-> 主题本身只读 `/etc/config/graphite`，写这个文件的设置页在
-> [**Zakkaus/luci-app-graphite**](https://github.com/Zakkaus/luci-app-graphite)，
-> 与主题一同发布。不装它，主题照常工作，但只能通过 ssh 编辑配置文件来换配色。
+> **配色、强调色与品牌名在界面里修改，需要另装
+> [luci-app-graphite](https://github.com/Zakkaus/luci-app-graphite)**，与主题一同发布。
 
 ## 运行环境
 
@@ -168,9 +166,8 @@ Graphite 取自一组为纯灰界面调过的值。`accent_custom` 接受六位�
 | **Graphite + 自定义 `#e4572e`** | <img src="docs/screenshots/zh-CN/accent-graphite-custom-light.png" width="380"> | <img src="docs/screenshots/zh-CN/accent-graphite-custom-dark.png" width="380"> |
 
 上面四行是同一个界面在四种强调色下的样子，取值分别来自 Graphite 自己、
-Catppuccin 的 flavour、Tokyo Night 的调色板，以及一个自定义色号。在界面里切换
-它们需要装设置页 [**Zakkaus/luci-app-graphite**](https://github.com/Zakkaus/luci-app-graphite)；
-不装设置页时，改 `/etc/config/graphite` 的 `accent` 或 `accent_custom` 同样生效。
+Catppuccin 的 flavour、Tokyo Night 的调色板，以及一个自定义色号。切换它们在
+[luci-app-graphite](https://github.com/Zakkaus/luci-app-graphite) 的外观页。
 
 强调色上的文字不写死颜色。Graphite 的八个取值按实测对比度反推压低明度，白字
 稳定达标；Catppuccin 与 Tokyo Night 两端差别大，深色 flavour 的强调色明度在
