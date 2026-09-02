@@ -9,6 +9,8 @@
 
 **A LuCI theme for OpenWrt**, `luci-theme-graphite`.
 
+Palette, accent and brand name are changed from the interface with the separate settings page [**luci-app-graphite**](https://github.com/Zakkaus/luci-app-graphite).
+
 English · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
 
 [Requirements](#requirements) • [Install](#install) • [Palettes](#palettes) • [Settings](#settings) • [Phone](#phone) • [Layout](#layout)
@@ -16,6 +18,13 @@ English · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
 </div>
 
 ![Overview](docs/screenshots/en/graphite-overview-light.png)
+
+> [!TIP]
+> **Changing the palette, accent or brand name from the interface needs a second package.**
+> The theme only reads `/etc/config/graphite`; the page that writes it lives in
+> [**Zakkaus/luci-app-graphite**](https://github.com/Zakkaus/luci-app-graphite)
+> and is released alongside the theme. Without it the theme works as it is, but the
+> palette can only be changed by editing the config file over ssh.
 
 ## Requirements
 
@@ -169,6 +178,12 @@ the name under any palette.
 | **Catppuccin Mocha + mauve** | <img src="docs/screenshots/en/accent-catppuccin-mocha-light.png" width="380"> | <img src="docs/screenshots/en/accent-catppuccin-mocha-dark.png" width="380"> |
 | **Tokyo Night + teal** | <img src="docs/screenshots/en/accent-tokyonight-night-light.png" width="380"> | <img src="docs/screenshots/en/accent-tokyonight-night-dark.png" width="380"> |
 | **Graphite + custom `#e4572e`** | <img src="docs/screenshots/en/accent-graphite-custom-light.png" width="380"> | <img src="docs/screenshots/en/accent-graphite-custom-dark.png" width="380"> |
+
+The four rows above are one interface under four accents, drawn from Graphite's own
+values, a Catppuccin flavour, Tokyo Night's palette, and a hand-written colour.
+Switching between them from the interface needs the settings page
+[**Zakkaus/luci-app-graphite**](https://github.com/Zakkaus/luci-app-graphite);
+without it, `accent` or `accent_custom` in `/etc/config/graphite` does the same.
 
 The text on an accent is not a fixed colour. Graphite's eight values have their lightness
 pushed down from measured contrast so white always clears the floor; Catppuccin and Tokyo
