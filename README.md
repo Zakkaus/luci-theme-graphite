@@ -93,7 +93,7 @@ rather than intended.
 
 | Palette | Light | Dark |
 |---|---|---|
-| **Graphite（默认）** | <img src="docs/screenshots/en/graphite-overview-light.png" width="380"> | <img src="docs/screenshots/en/graphite-overview-dark.png" width="380"> |
+| **Graphite (default)** | <img src="docs/screenshots/en/graphite-overview-light.png" width="380"> | <img src="docs/screenshots/en/graphite-overview-dark.png" width="380"> |
 | **Catppuccin Frappé** | <img src="docs/screenshots/en/catppuccin-frappe-overview-light.png" width="380"> | <img src="docs/screenshots/en/catppuccin-frappe-overview-dark.png" width="380"> |
 | **Catppuccin Macchiato** | <img src="docs/screenshots/en/catppuccin-macchiato-overview-light.png" width="380"> | <img src="docs/screenshots/en/catppuccin-macchiato-overview-dark.png" width="380"> |
 | **Catppuccin Mocha** | <img src="docs/screenshots/en/catppuccin-mocha-overview-light.png" width="380"> | <img src="docs/screenshots/en/catppuccin-mocha-overview-dark.png" width="380"> |
@@ -103,7 +103,7 @@ rather than intended.
 Two more pages per palette — the realtime graphs and a form-heavy page:
 
 <details>
-<summary>Graphite（默认） — Realtime and System</summary>
+<summary>Graphite (default) — Realtime and System</summary>
 
 <img src="docs/screenshots/en/graphite-realtime-light.png" width="420"> <img src="docs/screenshots/en/graphite-realtime-dark.png" width="420">
 <img src="docs/screenshots/en/graphite-system-light.png" width="420"> <img src="docs/screenshots/en/graphite-system-dark.png" width="420">

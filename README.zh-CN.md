@@ -83,7 +83,7 @@ Catppuccin 的浅色模式使用 Latte，Tokyo Night 使用 Day。切换配色�
 
 | 配色 | 浅色 | 深色 |
 |---|---|---|
-| **Graphite（預設）** | <img src="docs/screenshots/zh-CN/graphite-overview-light.png" width="380"> | <img src="docs/screenshots/zh-CN/graphite-overview-dark.png" width="380"> |
+| **Graphite（默认）** | <img src="docs/screenshots/zh-CN/graphite-overview-light.png" width="380"> | <img src="docs/screenshots/zh-CN/graphite-overview-dark.png" width="380"> |
 | **Catppuccin Frappé** | <img src="docs/screenshots/zh-CN/catppuccin-frappe-overview-light.png" width="380"> | <img src="docs/screenshots/zh-CN/catppuccin-frappe-overview-dark.png" width="380"> |
 | **Catppuccin Macchiato** | <img src="docs/screenshots/zh-CN/catppuccin-macchiato-overview-light.png" width="380"> | <img src="docs/screenshots/zh-CN/catppuccin-macchiato-overview-dark.png" width="380"> |
 | **Catppuccin Mocha** | <img src="docs/screenshots/zh-CN/catppuccin-mocha-overview-light.png" width="380"> | <img src="docs/screenshots/zh-CN/catppuccin-mocha-overview-dark.png" width="380"> |
@@ -93,7 +93,7 @@ Catppuccin 的浅色模式使用 Latte，Tokyo Night 使用 Day。切换配色�
 每套配色另有实时信息和系统两页。
 
 <details>
-<summary>Graphite（預設） — 实时信息与系统</summary>
+<summary>Graphite（默认） — 实时信息与系统</summary>
 
 <img src="docs/screenshots/zh-CN/graphite-realtime-light.png" width="420"> <img src="docs/screenshots/zh-CN/graphite-realtime-dark.png" width="420">
 <img src="docs/screenshots/zh-CN/graphite-system-light.png" width="420"> <img src="docs/screenshots/zh-CN/graphite-system-dark.png" width="420">
