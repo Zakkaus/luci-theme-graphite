@@ -37,11 +37,14 @@ whatever its CPU. Take the packages from the [latest release](https://github.com
 them to the router:
 
 ```sh
-apk add ./luci-theme-graphite-*.apk        # OpenWrt 25.12 and later
-apk add ./luci-app-graphite-*.apk          # optional: the settings page
-apk add ./luci-i18n-graphite-*.apk         # optional: translations
+# OpenWrt 25.12 and later. --allow-untrusted because these are not signed
+# with the release key; install.sh passes it for you.
+apk add --allow-untrusted ./luci-theme-graphite-*.apk
+apk add --allow-untrusted ./luci-app-graphite-*.apk    # optional: the settings page
+apk add --allow-untrusted ./luci-i18n-graphite-*.apk   # optional: translations
 
-opkg install ./luci-theme-graphite_*.ipk   # OpenWrt 24.10 and earlier
+# OpenWrt 24.10 and earlier
+opkg install ./luci-theme-graphite_*.ipk
 ```
 
 Only the theme is required. It reads `/etc/config/graphite` and works without
@@ -82,9 +85,11 @@ only the token layer: no rule outside `palettes.css` knows which one is active.
 
 Based on, not copied from: the light flavours are published at a text contrast
 this theme will not ship. Tokyo Night Day puts secondary text at 3.8:1, under
-the 4.5:1 floor, and Latte's body text at 7:1. Every light flavour here is
-raised to 10:1 for body text and 5.5:1 for secondary. The hues are upstream's;
-the text lightness is not.
+the 4.5:1 floor, and Latte's body text at 7:1. Every palette here, in both
+schemes, is raised to 10:1 for body text and 5.5:1 for secondary. The hues are
+upstream's; the text lightness is not. `checks/contrast.py` paints each pair
+into a canvas and reads the pixels back, so the figures above are measured
+rather than intended.
 
 | Palette | Light | Dark |
 |---|---|---|

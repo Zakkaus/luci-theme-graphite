@@ -35,11 +35,14 @@
 架构无关。从[发布页](https://github.com/Zakkaus/luci-theme-graphite/releases/latest)取包，复制到路由器上执行：
 
 ```sh
-apk add ./luci-theme-graphite-*.apk        # OpenWrt 25.12 及以后
-apk add ./luci-app-graphite-*.apk          # 可选：设置页
-apk add ./luci-i18n-graphite-*.apk         # 可选：翻译
+# OpenWrt 25.12 及以后。这些包没有用发行版的密钥签名，所以要 --allow-untrusted，
+# install.sh 会替你带上。
+apk add --allow-untrusted ./luci-theme-graphite-*.apk
+apk add --allow-untrusted ./luci-app-graphite-*.apk    # 可选：设置页
+apk add --allow-untrusted ./luci-i18n-graphite-*.apk   # 可选：翻译
 
-opkg install ./luci-theme-graphite_*.ipk   # OpenWrt 24.10 及以前
+# OpenWrt 24.10 及以前
+opkg install ./luci-theme-graphite_*.ipk
 ```
 
 只有主题是必需的。它读取 `/etc/config/graphite`，没有设置页也能工作；那个包的
@@ -74,8 +77,9 @@ Catppuccin 的浅色模式使用 Latte，Tokyo Night 使用 Day。切换配色�
 `palettes.css` 以外的规则不区分当前配色。
 
 这些上游浅色配色的文字对比度低于本主题的下限。Tokyo Night Day 的次级文字为
-3.8:1，低于 4.5:1；Latte 的正文为 7:1。本主题的每套浅色配色沿用上游色相，
-将正文和次级文字的对比度分别设为 10:1 和 5.5:1。
+3.8:1，低于 4.5:1；Latte 的正文为 7:1。本主题的六套配色沿用上游色相，明暗
+两套都把正文和次级文字的对比度提到 10:1 和 5.5:1。`checks/contrast.py` 把每
+一对颜色画进画布再读回像素，所以上面这两个数是量出来的，不是定下来的。
 
 | 配色 | 浅色 | 深色 |
 |---|---|---|

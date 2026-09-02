@@ -1122,6 +1122,15 @@ input[type="text"], input[type="password"], input[type="number"] {
   pointer-events: none;
   cursor: not-allowed;
 }
+/* The same state on the controls the browser draws. form.js renders a field
+   the session may not write as a plain disabled input, and until now the only
+   thing separating it from an editable one was the cursor — a field nobody
+   can change looked exactly like a field anyone can. The value stays legible:
+   it is still the configuration, and a reader has to be able to check it. */
+input:disabled, select:disabled, textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 
 .cbi-dropdown img {
   max-block-size: var(--control-h-sm);
@@ -1938,6 +1947,35 @@ input[type="text"], input[type="password"], input[type="number"] {
 /* `cbi-tab-disabled` is LuCI's name for "not the current tab", not for one
    that cannot be used. */
 .cbi-tabmenu > li.cbi-tab-disabled > a { color: var(--foreground); }
+/* ui.js counts the invalid fields inside each tab panel and writes the number
+   onto the tab it belongs to, so a reader on one tab can be told that another
+   one is holding the form back. Without a rule the attribute is written and
+   nothing shows, and the page refuses to save for a reason that is on a tab
+   the reader is not looking at. */
+.cbi-tabmenu > li[data-errors] > a,
+.tabs > .tab[data-errors] {
+  color: var(--status-bad-fg);
+}
+/* The badge hangs on the element that carries the count. attr() reads the
+   attribute of the element the pseudo belongs to, and ui.js writes the number
+   onto the <li>, so putting it on the <a> inside gave a coloured label and an
+   empty badge. */
+.cbi-tabmenu > li[data-errors] { display: inline-flex; align-items: center; }
+.cbi-tabmenu > li[data-errors]::after,
+.tabs > .tab[data-errors]::after {
+  content: attr(data-errors);
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 1.25em;
+  block-size: 1.25em;
+  margin-inline-start: var(--sp-2);
+  padding-inline: 0.25em;
+  border-radius: var(--radius-full);
+  background: var(--status-bad-bg);
+  color: var(--status-bad-fg);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
 [data-tab-active="false"] { display: none; }
 
 /* Both tab rows draw their rule as an inset shadow, and a shadow fills the
@@ -2060,6 +2098,13 @@ input[type="text"], input[type="password"], input[type="number"] {
 }
 .ifacebox-body > div > .ifacebadge + .ifacebadge {
   margin-block-start: var(--sp-2);
+}
+/* The overview's network panel puts the interface boxes and the connections
+   table in one div as siblings, with nothing between them: the table opened
+   ten pixels under the box, close enough that a hovered row reads as an
+   extension of the box above it rather than the start of a table. */
+.network-status-table + .table {
+  margin-block-start: var(--sp-4);
 }
 
 /* The browser gave the zone card's column 250px for a 128px card. The 1% is
