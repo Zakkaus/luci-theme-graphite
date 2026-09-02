@@ -9,6 +9,8 @@
 
 **A LuCI theme for OpenWrt**, `luci-theme-graphite`.
 
+Palette, accent and brand name are changed from the interface with the separate settings page [**luci-app-graphite**](https://github.com/Zakkaus/luci-app-graphite).
+
 English · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
 
 [Requirements](#requirements) • [Install](#install) • [Palettes](#palettes) • [Settings](#settings) • [Phone](#phone) • [Layout](#layout)

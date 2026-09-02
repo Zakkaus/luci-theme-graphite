@@ -9,6 +9,8 @@
 
 **OpenWrt 的 LuCI 主题**，`luci-theme-graphite`。
 
+配色、强调色与品牌名可在界面中修改，需另装设置页 [**luci-app-graphite**](https://github.com/Zakkaus/luci-app-graphite)。
+
 [English](README.md) · 简体中文 · [繁體中文](README.zh-TW.md)
 
 [运行环境](#运行环境) • [安装](#安装) • [配色](#配色) • [设置](#设置) • [手机](#手机) • [分层](#分层)
