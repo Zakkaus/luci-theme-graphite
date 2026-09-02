@@ -125,6 +125,11 @@ button:disabled, .cbi-button:disabled,
   text-align: right;
   white-space: nowrap;
 }
+/* The heading over that cell carries the same class, and .th's own alignment
+   was beating it: the DHCP lease table put "Static lease" at the column's left
+   edge and the buttons under it at the right, thirty-four pixels apart. A
+   column heading stands over its column. */
+.th.cbi-section-actions { text-align: right; }
 .cbi-section-actions > * + *,
 .td.cbi-section-actions > * + * { margin-inline-start: var(--sp-2); }
 
