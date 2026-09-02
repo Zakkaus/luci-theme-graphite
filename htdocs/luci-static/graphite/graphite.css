@@ -164,6 +164,13 @@ body.lang_it, body.lang_pt, body.lang_pl, body.lang_tr { line-height: var(--lh-l
   white-space: nowrap;
 }
 
+/* The sidebar's group headings — Status, System, Network. shell.css sets them
+   at 0.6875rem, which is a size the closed scale here does not carry and which
+   sat small against the 14px items under it. --text-xs is the rung above; the
+   next one up is 13px, within a pixel of the items themselves, and a heading
+   that size stops reading as a heading. */
+.nav-label { font-size: var(--text-xs); }
+
 .theme-switch { display: flex; gap: var(--sp-1); }
 /* Chosen without a hue: a surface plus a border the others do not have. */
 .theme-switch [role="radio"][aria-checked="true"] {

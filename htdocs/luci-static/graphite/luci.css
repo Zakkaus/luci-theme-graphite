@@ -1756,8 +1756,14 @@ input:disabled, select:disabled, textarea:disabled {
 /* LuCI marks a row with more detail behind it by putting a literal "#" in the
    first cell and hanging data-tooltip off it, which reads as leftover markup.
    The character stays — CSS cannot replace a text node, and it is what a
-   screen reader gets — but on screen it becomes a mark that says so. */
-.td > [data-tooltip] {
+   screen reader gets — but on screen it becomes a mark that says so.
+
+   Only where the attribute sits on a bare marker. LuCI also hangs it off real
+   controls — the DHCP lease table gives its reserve-address button one — and
+   this rule turned that button into an 18px circle with its label spilling out
+   of it, because the button's own font-size overrode the size:0 that hides the
+   marker's character. A control explains itself; it does not need the mark. */
+.td > [data-tooltip]:not(button):not(a):not(input):not(select):not(.btn):not(.cbi-button) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1771,12 +1777,12 @@ input:disabled, select:disabled, textarea:disabled {
   cursor: help;
   transition: color var(--dur-hover) var(--ease-out), border-color var(--dur-hover) var(--ease-out);
 }
-.td > [data-tooltip]::after {
+.td > [data-tooltip]:not(button):not(a):not(input):not(select):not(.btn):not(.cbi-button)::after {
   content: "i";
   font: 600 0.6875rem/1 var(--font-mono);
 }
 @media (hover: hover) {
-  .td > [data-tooltip]:hover { color: var(--foreground); border-color: var(--foreground); }
+  .td > [data-tooltip]:not(button):not(a):not(input):not(select):not(.btn):not(.cbi-button):hover { color: var(--foreground); border-color: var(--foreground); }
 }
 /* The row fill and the rule between rows are the same band and the text sits
    inside it. Three things have to hold at once: the rule lines up with
@@ -1823,7 +1829,15 @@ input:disabled, select:disabled, textarea:disabled {
    no wrapper for the rules above to use. The section can be the scroller
    itself — unlike .shell-main, where the same move kills the sticky bar. */
 .cbi-section:has(> .table),
-.cbi-section:has(> .cbi-section-node > .table) { overflow-x: auto; }
+.cbi-section:has(> .cbi-section-node > .table) {
+  overflow-x: auto;
+  /* A horizontal scrollbar is laid inside this box, under everything in it,
+     and the card's own bottom padding is all it has to sit in. On the firewall
+     page that put the bar hard against the Add button below the table. The
+     extra band is the scrollbar's own; it costs the same on a card that never
+     scrolls, and CSS cannot ask whether this one will. */
+  padding-block-end: var(--sp-6);
+}
 
 /* The table bleeds to the card's frame and its cells give the distance back as
    their own padding, so the text still lands on the card's content line — where
