@@ -368,6 +368,29 @@ body.lang_it, body.lang_pt, body.lang_pl, body.lang_tr { line-height: var(--lh-l
 
   .shell-content { padding: var(--sp-4) var(--sp-3); }
   .login-panel { --login-inset: var(--sp-5); }
+
+  /* The document scrolls, not the right column. On a desktop the inner
+     scroller keeps the sidebar still while the page moves; on a phone the
+     sidebar is a drawer and there is nothing to keep still, so the nested
+     scroller only costs — on iOS a sticky element inside a scrolling
+     container rides away with the content, and a page that never scrolls the
+     document never lets Safari collapse its address bar.
+
+     The bar is fixed rather than sticky here, and that is not a preference.
+     components.css sets overflow-x on html and body; an ancestor overflow
+     other than visible turns sticky off without saying so, which is why the
+     scrolling was moved inside in the first place. Fixed does not consult its
+     ancestors. The row it vacates is given back as padding. */
+  .shell { block-size: auto; overflow: visible; }
+  .shell-main { block-size: auto; min-block-size: 0; overflow: visible; padding-block-start: var(--header-h); }
+  /* Horizontal only. The inner scroller was also what kept a wide page — the
+     file manager, shadowsocksr — from pushing the document sideways, and
+     giving it up cost 256px of sideways scroll at 360. Naming one axis makes
+     the browser compute the other as auto, which is harmless here: the column
+     is auto-height, so it never has anything to scroll vertically and the
+     document keeps that job. */
+  .shell-content { overflow-x: auto; }
+  .shell-header { position: fixed; inset-block-start: 0; inset-inline: 0; }
 }
 
 /* Links take the surrounding ink and are marked by an underline, not a hue:

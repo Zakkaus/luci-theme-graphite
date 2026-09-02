@@ -1658,6 +1658,17 @@ input[type="text"], input[type="password"], input[type="number"] {
   background: var(--bar-fill);
   transition: width var(--dur-surface) var(--ease-out);
 }
+/* On a phone the value column is half the row and the bar is left with 160px
+   for a label that needs 170. Centred, that clips five pixels off each end,
+   which takes the leading digit as well as the percentage. The label column
+   holds three or four characters, so it shrinks to what it holds and the bar
+   takes the rest — 286px at 430, 216px at 360, both past what the longest
+   label needs. Alignment moves to the start as well: if a label ever does
+   overrun, losing the tail is recoverable and losing the first digit is not. */
+@media (max-width: 30rem) {
+  .cbi-section .table:has(.cbi-progressbar) .td:first-child { inline-size: 1%; }
+  .cbi-progressbar::after { place-items: center start; padding-inline: var(--sp-2); }
+}
 .cbi-progressbar::after {
   content: attr(title);
   position: absolute;
@@ -2038,6 +2049,18 @@ input[type="text"], input[type="password"], input[type="number"] {
 }
 .ifacebox-body > span,
 .ifacebox-body > .ifacebadge { white-space: nowrap; }
+/* The wireless panel puts one badge per SSID in a plain <div>, and a badge is
+   an inline chip, so each shrank to its own text: four boxes with the same
+   left edge, four different right edges, and nothing between them. Stacked,
+   they are rows of a list and take the width of the list. */
+.ifacebox-body > div > .ifacebadge {
+  display: flex;
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+.ifacebox-body > div > .ifacebadge + .ifacebadge {
+  margin-block-start: var(--sp-2);
+}
 
 /* The browser gave the zone card's column 250px for a 128px card. The 1% is
    the standard way to tell a table "as narrow as the content allows". */
