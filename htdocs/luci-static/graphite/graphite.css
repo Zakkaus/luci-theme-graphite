@@ -79,6 +79,14 @@
      table pushed every text-heavy page past a hundred characters a line; a
      wide table already has its own answer, which is to scroll in place. */
   --content-max: 72rem;
+
+  /* 正文的对比度上限。测出来的问题是密页太硬：进程页 935 个带文字的元素里
+     99% 落在同一档最高对比度上，软件包页 527 个里 81%，全是一堵墙。
+     根子在默认配色的 --foreground 是 oklch(0.07)，近黑；而六套配色自己的正文色
+     本来就在 0.31 一带，并不硬。所以这里不是整体调亮，是给最暗的那一端设一个
+     下限——本来就软的配色一个字节都不动，只有近黑那一档被抬到 0.22。
+     暗色同理，从另一端封顶，避免纯白字打在深底上。 */
+  --content-foreground: oklch(from var(--foreground) max(l, 0.22) c h);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -89,6 +97,7 @@
     --inverse-surface: oklch(0.93 var(--tint-c) var(--tint-h));
     --inverse-foreground: oklch(0.12 var(--tint-c) var(--tint-h));
     --bar-fill: var(--foreground);
+    --content-foreground: oklch(from var(--foreground) min(l, 0.90) c h);
   --inverse-fill: oklch(0 0 0 / 12%);
     --inverse-line: oklch(0 0 0 / 24%);
     --elev-3: inset 0 1px 0 oklch(1 0 0 / 16%), 0 16px 40px -12px oklch(0 0 0 / 75%);
@@ -110,6 +119,7 @@
   --inverse-surface: oklch(0.93 var(--tint-c) var(--tint-h));
   --inverse-foreground: oklch(0.12 var(--tint-c) var(--tint-h));
   --bar-fill: var(--foreground);
+    --content-foreground: oklch(from var(--foreground) min(l, 0.90) c h);
   --inverse-fill: oklch(0 0 0 / 12%);
   --inverse-line: oklch(0 0 0 / 24%);
   --elev-3: inset 0 1px 0 oklch(1 0 0 / 16%), 0 16px 40px -12px oklch(0 0 0 / 75%);
@@ -326,6 +336,9 @@ body.lang_it, body.lang_pt, body.lang_pl, body.lang_tr { line-height: var(--lh-l
   /* Without labels the group rule is the only thing marking a group end. */
   :root[data-rail] .nav { gap: var(--sp-3); }
   :root[data-rail] .nav-group + .nav-group { border-block-start: 1px solid var(--border); padding-block-start: var(--sp-3); }
+  /* The rail hides the labels, so there is no control left to expand a group
+     with. Collapse is a wide-sidebar affordance and does not survive into it. */
+  :root[data-rail] .nav-group[data-collapsed] > .nav-item { display: flex; }
   .shell-aside { transition: width var(--dur-surface) var(--ease-out); }
 }
 
@@ -428,10 +441,34 @@ a { color: inherit; }
 .shell-content a.tab { text-decoration: none; }
 .brand, .shell-footer a, .tab { color: inherit; }
 
-/* Not muted: in a console every entry is a place you go to work, and muted
-   reads as "not available". Current is carried by surface and weight. */
-.nav-item { color: var(--foreground); }
+/* Non-current entries recede. This reverses an earlier decision here — that
+   in a console every entry is a place you go to work, so muting one reads as
+   "not available". That held while a group was the whole list; once the nav
+   collapses to one open group, the muted entries are the ones you are already
+   looking at, and the contrast is what tells you which of them you are on. */
+.nav-item { color: var(--muted-foreground); }
+.nav-item[data-active] { color: var(--foreground); }
 .nav-label { color: var(--muted-foreground); }
+
+/* The heading stays the div shell.css styles — it only becomes operable. A
+   real <button> would bring the UA's font with it and land at weight 400
+   against the 600 the heading is set in. */
+.nav-label {
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2);
+}
+.nav-label:hover { color: var(--foreground); }
+
+/* A chevron rather than a plus: it points at where the list will appear. */
+.nav-label::after {
+  content: ""; inline-size: 6px; block-size: 6px; flex: none;
+  border-inline-end: 1.5px solid currentColor; border-block-end: 1.5px solid currentColor;
+  transform: rotate(-135deg); margin-block-start: 3px; margin-inline-end: var(--sp-2);
+  opacity: .55; transition: transform .15s ease;
+}
+.nav-label[aria-expanded="false"]::after { transform: rotate(45deg); margin-block-start: 0; }
+
+.nav-group[data-collapsed] > .nav-item { display: none; }
 .brand { text-decoration: none; }
 
 /* The login page has no top bar, so its switch floats in the corner. */
@@ -581,5 +618,3 @@ hr {
 input[type="checkbox"], input[type="radio"], input[type="range"], progress {
   accent-color: var(--foreground);
 }
-
-
