@@ -1,0 +1,179 @@
+/* 强调色层。
+
+   它必须排在 palettes.css 之后：那一份会为每套配色重新声明 --primary，而强调色
+   要盖住的正是它。这层原本写在 graphite.css 里，而 graphite.css 在 palettes.css
+   之前加载，于是同特异度时配色赢——强调色在 Graphite 下正常、一选配色就时灵时不灵，
+   查了一轮才发现是加载顺序而不是选择器写错。分成一层之后，顺序本身就是规则，
+   不必再靠给每条选择器多堆一个属性去赢。
+
+   强调色画的是界面上所有「这是主要动作 / 你在这里 / 这是本产品」的标记：主按钮
+   的底、焦点环、活动徽标、侧栏与登录页的品牌方块，以及侧栏里选中项的左轨和底色。
+
+   八个名字在每套配色下都由那套自己的取值来回答，所以强调色始终属于它周围那一套：
+   Catppuccin 取自它 flavour 自己的强调色表，Tokyo Night 取自 folke/tokyonight.nvim，
+   Graphite 取自一组为纯灰界面调过的值。自定义色号是唯一不来自任何一套的入口，
+   而那正是它存在的意义。 */
+
+:root[data-accent] { --ring: var(--primary); }
+
+/* 强调色上的文字。三种情况分开，因为三种的取值域不同。
+
+   Graphite 的八个明度在 0.52 到 0.58 之间，白字稳过，写死白色——黄绿青三个
+   色相天生亮，是照实测的对比度反推压下来的，不是随手选的——记号与主按钮都白，
+   同一套强调色就只有一种长相。
+
+   Catppuccin 让浏览器按实际亮度选。它自己的规矩是强调色当底、Base 当字，但那个
+   组合过不了这里的下限：Latte 的绿配它的 Base 只有 3.74:1，而 README 承诺的是
+   更高。它的深色 flavour 那一侧问题相反——强调色是明度 0.85 往上的粉彩，白字在
+   上面只有 1.3:1。两端都要求前景跟着底色走，不能写死任何一个。
+
+   自定义色号谁也不知道使用者会填什么，所以留给浏览器按实际亮度选：
+   contrast-color() 是正确答案，前一条按 OKLCH 明度取阈值的是老浏览器上的近似
+   （同一明度下不同色相亮度差很多，按 l 判断必然在某些色相上判反）。 */
+:root[data-accent]:not([data-palette]) { --primary-foreground: oklch(1 0 0); }
+
+:root[data-palette^="catppuccin"][data-accent] {
+  --primary-foreground: oklch(from var(--primary) clamp(0, (0.62 - l) * 1000, 1) 0 0);
+  --primary-foreground: contrast-color(var(--primary));
+}
+
+/* 自定义色号。--primary 由模板写进行内样式，行内样式压过这里的任何选择器，
+   所以配色各自的具名取值不会盖住它；这里只负责给它配一个能读的前景。 */
+:root[data-accent="custom"],
+:root[data-palette][data-accent="custom"] {
+  --primary-foreground: oklch(from var(--primary) clamp(0, (0.62 - l) * 1000, 1) 0 0);
+  --primary-foreground: contrast-color(var(--primary));
+}
+
+/* 品牌方块里的标记始终是白的，不跟着自动前景走。那个令牌是给按钮上的文字用的，
+   它在浅色强调色上会正确地选黑字；但标记不是文字，它是这个产品的记号，白色是它
+   唯一的样子——一个时黑时白的记号已经不是同一个记号。它带 aria-hidden，读者
+   永远不需要辨认它的形状来取得信息。 */
+:root[data-accent] .brand .mark { background: var(--primary); color: oklch(1 0 0); }
+:root[data-accent] .nav-item[data-active] { background: oklch(from var(--primary) l c h / 12%); }
+:root[data-accent] .nav-item[data-active]::before { background: var(--primary); }
+
+/* 主按钮组里的那条分隔线原本来自 --border，一条中性灰画在饱和的强调色底上会脏。 */
+:root[data-accent] [data-slot="button-group"][data-variant="primary"] > [data-slot="button"] + [data-slot="button"],
+:root[data-accent] .cbi-button-apply + .cbi-button,
+:root[data-accent] .cbi-button-save + .cbi-button {
+  border-inline-start-color: oklch(from var(--primary-foreground) l c h / 30%);
+}
+
+/* Graphite —— 纯灰界面上的唯一一抹颜色。 */
+:root[data-accent="pink"]:not([data-palette]) { --primary: oklch(0.58 0.17 338.433); }
+:root[data-accent="mauve"]:not([data-palette]) { --primary: oklch(0.58 0.24 297.016); }
+:root[data-accent="red"]:not([data-palette]) { --primary: oklch(0.58 0.22 19.809); }
+:root[data-accent="peach"]:not([data-palette]) { --primary: oklch(0.58 0.20 42.429); }
+:root[data-accent="yellow"]:not([data-palette]) { --primary: oklch(0.56 0.15 67.777); }
+:root[data-accent="green"]:not([data-palette]) { --primary: oklch(0.54 0.18 140.445); }
+:root[data-accent="teal"]:not([data-palette]) { --primary: oklch(0.52 0.14 201.105); }
+:root[data-accent="blue"]:not([data-palette]) { --primary: oklch(0.58 0.23 262.087); }
+
+/* Catppuccin —— 亮色一律 Latte。 */
+:root[data-palette^="catppuccin"][data-accent="pink"] { --primary: oklch(0.726 0.174 338.433); }
+:root[data-palette^="catppuccin"][data-accent="mauve"] { --primary: oklch(0.555 0.250 297.016); }
+:root[data-palette^="catppuccin"][data-accent="red"] { --primary: oklch(0.550 0.216 19.809); }
+:root[data-palette^="catppuccin"][data-accent="peach"] { --primary: oklch(0.692 0.204 42.429); }
+:root[data-palette^="catppuccin"][data-accent="yellow"] { --primary: oklch(0.714 0.149 67.777); }
+:root[data-palette^="catppuccin"][data-accent="green"] { --primary: oklch(0.625 0.177 140.445); }
+:root[data-palette^="catppuccin"][data-accent="teal"] { --primary: oklch(0.602 0.098 201.105); }
+:root[data-palette^="catppuccin"][data-accent="blue"] { --primary: oklch(0.559 0.226 262.087); }
+
+/* catppuccin-frappe 的深色一侧。 */
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="catppuccin-frappe"]:not([data-theme="light"])[data-accent="pink"] { --primary: oklch(0.850 0.089 336.263); }
+  :root[data-palette="catppuccin-frappe"]:not([data-theme="light"])[data-accent="mauve"] { --primary: oklch(0.765 0.111 311.744); }
+  :root[data-palette="catppuccin-frappe"]:not([data-theme="light"])[data-accent="red"] { --primary: oklch(0.717 0.124 19.386); }
+  :root[data-palette="catppuccin-frappe"]:not([data-theme="light"])[data-accent="peach"] { --primary: oklch(0.773 0.111 47.726); }
+  :root[data-palette="catppuccin-frappe"]:not([data-theme="light"])[data-accent="yellow"] { --primary: oklch(0.844 0.080 83.472); }
+  :root[data-palette="catppuccin-frappe"]:not([data-theme="light"])[data-accent="green"] { --primary: oklch(0.812 0.107 133.392); }
+  :root[data-palette="catppuccin-frappe"]:not([data-theme="light"])[data-accent="teal"] { --primary: oklch(0.783 0.073 184.645); }
+  :root[data-palette="catppuccin-frappe"]:not([data-theme="light"])[data-accent="blue"] { --primary: oklch(0.742 0.104 265.663); }
+}
+:root[data-palette="catppuccin-frappe"][data-theme="dark"][data-accent="pink"] { --primary: oklch(0.850 0.089 336.263); }
+:root[data-palette="catppuccin-frappe"][data-theme="dark"][data-accent="mauve"] { --primary: oklch(0.765 0.111 311.744); }
+:root[data-palette="catppuccin-frappe"][data-theme="dark"][data-accent="red"] { --primary: oklch(0.717 0.124 19.386); }
+:root[data-palette="catppuccin-frappe"][data-theme="dark"][data-accent="peach"] { --primary: oklch(0.773 0.111 47.726); }
+:root[data-palette="catppuccin-frappe"][data-theme="dark"][data-accent="yellow"] { --primary: oklch(0.844 0.080 83.472); }
+:root[data-palette="catppuccin-frappe"][data-theme="dark"][data-accent="green"] { --primary: oklch(0.812 0.107 133.392); }
+:root[data-palette="catppuccin-frappe"][data-theme="dark"][data-accent="teal"] { --primary: oklch(0.783 0.073 184.645); }
+:root[data-palette="catppuccin-frappe"][data-theme="dark"][data-accent="blue"] { --primary: oklch(0.742 0.104 265.663); }
+
+/* catppuccin-macchiato 的深色一侧。 */
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="catppuccin-macchiato"]:not([data-theme="light"])[data-accent="pink"] { --primary: oklch(0.861 0.083 336.180); }
+  :root[data-palette="catppuccin-macchiato"]:not([data-theme="light"])[data-accent="mauve"] { --primary: oklch(0.772 0.126 303.898); }
+  :root[data-palette="catppuccin-macchiato"]:not([data-theme="light"])[data-accent="red"] { --primary: oklch(0.737 0.125 11.194); }
+  :root[data-palette="catppuccin-macchiato"]:not([data-theme="light"])[data-accent="peach"] { --primary: oklch(0.799 0.106 49.638); }
+  :root[data-palette="catppuccin-macchiato"]:not([data-theme="light"])[data-accent="yellow"] { --primary: oklch(0.879 0.074 84.751); }
+  :root[data-palette="catppuccin-macchiato"]:not([data-theme="light"])[data-accent="green"] { --primary: oklch(0.835 0.108 138.150); }
+  :root[data-palette="catppuccin-macchiato"]:not([data-theme="light"])[data-accent="teal"] { --primary: oklch(0.821 0.076 184.100); }
+  :root[data-palette="catppuccin-macchiato"]:not([data-theme="light"])[data-accent="blue"] { --primary: oklch(0.750 0.110 263.810); }
+}
+:root[data-palette="catppuccin-macchiato"][data-theme="dark"][data-accent="pink"] { --primary: oklch(0.861 0.083 336.180); }
+:root[data-palette="catppuccin-macchiato"][data-theme="dark"][data-accent="mauve"] { --primary: oklch(0.772 0.126 303.898); }
+:root[data-palette="catppuccin-macchiato"][data-theme="dark"][data-accent="red"] { --primary: oklch(0.737 0.125 11.194); }
+:root[data-palette="catppuccin-macchiato"][data-theme="dark"][data-accent="peach"] { --primary: oklch(0.799 0.106 49.638); }
+:root[data-palette="catppuccin-macchiato"][data-theme="dark"][data-accent="yellow"] { --primary: oklch(0.879 0.074 84.751); }
+:root[data-palette="catppuccin-macchiato"][data-theme="dark"][data-accent="green"] { --primary: oklch(0.835 0.108 138.150); }
+:root[data-palette="catppuccin-macchiato"][data-theme="dark"][data-accent="teal"] { --primary: oklch(0.821 0.076 184.100); }
+:root[data-palette="catppuccin-macchiato"][data-theme="dark"][data-accent="blue"] { --primary: oklch(0.750 0.110 263.810); }
+
+/* catppuccin-mocha 的深色一侧。 */
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="catppuccin-mocha"]:not([data-theme="light"])[data-accent="pink"] { --primary: oklch(0.870 0.075 336.304); }
+  :root[data-palette="catppuccin-mocha"]:not([data-theme="light"])[data-accent="mauve"] { --primary: oklch(0.787 0.119 304.769); }
+  :root[data-palette="catppuccin-mocha"]:not([data-theme="light"])[data-accent="red"] { --primary: oklch(0.756 0.130 2.764); }
+  :root[data-palette="catppuccin-mocha"]:not([data-theme="light"])[data-accent="peach"] { --primary: oklch(0.824 0.101 52.629); }
+  :root[data-palette="catppuccin-mocha"]:not([data-theme="light"])[data-accent="yellow"] { --primary: oklch(0.919 0.070 86.528); }
+  :root[data-palette="catppuccin-mocha"]:not([data-theme="light"])[data-accent="green"] { --primary: oklch(0.858 0.109 142.715); }
+  :root[data-palette="catppuccin-mocha"]:not([data-theme="light"])[data-accent="teal"] { --primary: oklch(0.858 0.079 182.750); }
+  :root[data-palette="catppuccin-mocha"]:not([data-theme="light"])[data-accent="blue"] { --primary: oklch(0.766 0.111 259.885); }
+}
+:root[data-palette="catppuccin-mocha"][data-theme="dark"][data-accent="pink"] { --primary: oklch(0.870 0.075 336.304); }
+:root[data-palette="catppuccin-mocha"][data-theme="dark"][data-accent="mauve"] { --primary: oklch(0.787 0.119 304.769); }
+:root[data-palette="catppuccin-mocha"][data-theme="dark"][data-accent="red"] { --primary: oklch(0.756 0.130 2.764); }
+:root[data-palette="catppuccin-mocha"][data-theme="dark"][data-accent="peach"] { --primary: oklch(0.824 0.101 52.629); }
+:root[data-palette="catppuccin-mocha"][data-theme="dark"][data-accent="yellow"] { --primary: oklch(0.919 0.070 86.528); }
+:root[data-palette="catppuccin-mocha"][data-theme="dark"][data-accent="green"] { --primary: oklch(0.858 0.109 142.715); }
+:root[data-palette="catppuccin-mocha"][data-theme="dark"][data-accent="teal"] { --primary: oklch(0.858 0.079 182.750); }
+:root[data-palette="catppuccin-mocha"][data-theme="dark"][data-accent="blue"] { --primary: oklch(0.766 0.111 259.885); }
+
+/* Tokyo Night —— 取值来自 folke/tokyonight.nvim 的 extras/lua/tokyonight_{day,storm,night}.lua，
+   原样使用十六进制而不换算成 oklch：那是它发布的形式，换算一次就多一次出错的机会。
+   亮色一侧是 Day；Storm 与 Night 在这八个名字上的取值相同，两套共用。
+   名字对应它自己的叫法：pink→magenta，mauve→purple，peach→orange，其余同名。 */
+:root[data-palette^="tokyonight"][data-accent="pink"] { --primary: #9854f1; }
+:root[data-palette^="tokyonight"][data-accent="mauve"] { --primary: #7847bd; }
+:root[data-palette^="tokyonight"][data-accent="red"] { --primary: #f52a65; }
+:root[data-palette^="tokyonight"][data-accent="peach"] { --primary: #b15c00; }
+:root[data-palette^="tokyonight"][data-accent="yellow"] { --primary: #8c6c3e; }
+:root[data-palette^="tokyonight"][data-accent="green"] { --primary: #587539; }
+:root[data-palette^="tokyonight"][data-accent="teal"] { --primary: #118c74; }
+:root[data-palette^="tokyonight"][data-accent="blue"] { --primary: #2e7de9; }
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette^="tokyonight"]:not([data-theme="light"])[data-accent="pink"] { --primary: #bb9af7; }
+  :root[data-palette^="tokyonight"]:not([data-theme="light"])[data-accent="mauve"] { --primary: #9d7cd8; }
+  :root[data-palette^="tokyonight"]:not([data-theme="light"])[data-accent="red"] { --primary: #f7768e; }
+  :root[data-palette^="tokyonight"]:not([data-theme="light"])[data-accent="peach"] { --primary: #ff9e64; }
+  :root[data-palette^="tokyonight"]:not([data-theme="light"])[data-accent="yellow"] { --primary: #e0af68; }
+  :root[data-palette^="tokyonight"]:not([data-theme="light"])[data-accent="green"] { --primary: #9ece6a; }
+  :root[data-palette^="tokyonight"]:not([data-theme="light"])[data-accent="teal"] { --primary: #1abc9c; }
+  :root[data-palette^="tokyonight"]:not([data-theme="light"])[data-accent="blue"] { --primary: #7aa2f7; }
+}
+:root[data-palette^="tokyonight"][data-theme="dark"][data-accent="pink"] { --primary: #bb9af7; }
+:root[data-palette^="tokyonight"][data-theme="dark"][data-accent="mauve"] { --primary: #9d7cd8; }
+:root[data-palette^="tokyonight"][data-theme="dark"][data-accent="red"] { --primary: #f7768e; }
+:root[data-palette^="tokyonight"][data-theme="dark"][data-accent="peach"] { --primary: #ff9e64; }
+:root[data-palette^="tokyonight"][data-theme="dark"][data-accent="yellow"] { --primary: #e0af68; }
+:root[data-palette^="tokyonight"][data-theme="dark"][data-accent="green"] { --primary: #9ece6a; }
+:root[data-palette^="tokyonight"][data-theme="dark"][data-accent="teal"] { --primary: #1abc9c; }
+:root[data-palette^="tokyonight"][data-theme="dark"][data-accent="blue"] { --primary: #7aa2f7; }
+
+/* Tokyo Night 与 Catppuccin 同理：两端的强调色明暗差别很大，前景不能写死。 */
+:root[data-palette^="tokyonight"][data-accent] {
+  --primary-foreground: oklch(from var(--primary) clamp(0, (0.62 - l) * 1000, 1) 0 0);
+  --primary-foreground: contrast-color(var(--primary));
+}
