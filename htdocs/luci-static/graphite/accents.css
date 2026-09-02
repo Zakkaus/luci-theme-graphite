@@ -30,7 +30,10 @@
    自定义色号谁也不知道使用者会填什么，所以留给浏览器按实际亮度选：
    contrast-color() 是正确答案，前一条按 OKLCH 明度取阈值的是老浏览器上的近似
    （同一明度下不同色相亮度差很多，按 l 判断必然在某些色相上判反）。 */
-:root[data-accent]:not([data-palette]) { --primary-foreground: oklch(1 0 0); }
+/* 排除 custom：那八个预设的取值是按白字挑的，而自定义色号谁也不知道使用者会填
+   什么，得走下面按实际亮度选的那条。不排除的话这条 (0,3,0) 压过 [data-accent="custom"]
+   的 (0,2,0)，一个很浅的色号会拿到白字——四个粉彩色号实测全是白字，读不出来。 */
+:root[data-accent]:not([data-accent="custom"]):not([data-palette]) { --primary-foreground: oklch(1 0 0); }
 
 :root[data-palette^="catppuccin"][data-accent] {
   --primary-foreground: oklch(from var(--primary) clamp(0, (0.62 - l) * 1000, 1) 0 0);
@@ -45,12 +48,13 @@
   --primary-foreground: contrast-color(var(--primary));
 }
 
-/* 品牌方块里的标记始终是白的，不跟着自动前景走。那个令牌是给按钮上的文字用的，
-   它在浅色强调色上会正确地选黑字；但标记不是文字，它是这个产品的记号，白色是它
-   唯一的样子——一个时黑时白的记号已经不是同一个记号。它带 aria-hidden，读者
-   永远不需要辨认它的形状来取得信息。 */
+/* 品牌方块里的标记跟随自动前景。曾经写死白色，理由是记号是产品的记号、白色是它
+   唯一的样子；但那条只在中等明度的强调色下成立：八个预设算出来本来就是白的，而
+   粉彩强调色上的白色标记等于消失——Catppuccin 与 Tokyo Night 的深色 flavour，
+   以及任何浅色自定义色号，都会落进这一档。一个看不见的记号比一个会换色的记号
+   更不像同一个记号。 */
 :root[data-accent] .brand .mark,
-:root[data-accent] .login-head .mark { background: var(--primary); color: oklch(1 0 0); }
+:root[data-accent] .login-head .mark { background: var(--primary); color: var(--primary-foreground); }
 :root[data-accent] .nav-item[data-active] { background: oklch(from var(--primary) l c h / 12%); }
 :root[data-accent] .nav-item[data-active]::before { background: var(--primary); }
 
