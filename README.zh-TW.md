@@ -19,6 +19,12 @@
 
 ![概覽](docs/screenshots/zh-TW/graphite-overview-light.png)
 
+> [!TIP]
+> **配色、強調色與品牌名要在介面裡改，需要另裝一個套件。**
+> 主題本身只讀 `/etc/config/graphite`，寫這個檔案的設定頁在
+> [**Zakkaus/luci-app-graphite**](https://github.com/Zakkaus/luci-app-graphite)，
+> 與主題一同發布。不裝它，主題照常運作，但只能透過 ssh 編輯設定檔來換配色。
+
 ## 執行環境
 
 | | |
@@ -160,6 +166,11 @@ Graphite 取自一組為純灰介面調過的值。`accent_custom` 接受六位�
 | **Catppuccin Mocha + 木槿紫** | <img src="docs/screenshots/zh-TW/accent-catppuccin-mocha-light.png" width="380"> | <img src="docs/screenshots/zh-TW/accent-catppuccin-mocha-dark.png" width="380"> |
 | **Tokyo Night + 青** | <img src="docs/screenshots/zh-TW/accent-tokyonight-night-light.png" width="380"> | <img src="docs/screenshots/zh-TW/accent-tokyonight-night-dark.png" width="380"> |
 | **Graphite + 自訂 `#e4572e`** | <img src="docs/screenshots/zh-TW/accent-graphite-custom-light.png" width="380"> | <img src="docs/screenshots/zh-TW/accent-graphite-custom-dark.png" width="380"> |
+
+上面四行是同一個介面在四種強調色下的樣子，取值分別來自 Graphite 自己、
+Catppuccin 的 flavour、Tokyo Night 的調色盤，以及一個自訂色碼。在介面裡切換
+它們需要裝設定頁 [**Zakkaus/luci-app-graphite**](https://github.com/Zakkaus/luci-app-graphite)；
+不裝設定頁時，改 `/etc/config/graphite` 的 `accent` 或 `accent_custom` 同樣生效。
 
 強調色上的文字不寫死顏色。Graphite 的八個取值按實測對比度反推壓低明度，白字
 穩定達標；Catppuccin 與 Tokyo Night 兩端差別大，深色 flavour 的強調色明度在
