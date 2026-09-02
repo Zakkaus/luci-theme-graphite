@@ -140,6 +140,31 @@ Catppuccin 的浅色模式使用 Latte，Tokyo Night 使用 Day。切换配色�
 
 </details>
 
+### 强调色
+
+强调色画界面上表示主要动作与当前位置的部件：主按钮的底色、焦点环、活动徽标、
+侧栏与登录页的品牌方块，以及侧栏中当前条目的左轨和底色。其余部分仍是灰阶。
+默认不启用，此时这些部件使用配色自己的中性色。
+
+八个名字在每套配色下由该配色自己的取值回答，因此强调色始终属于它所在的那一套：
+Catppuccin 取自各 flavour 自己的强调色表，Tokyo Night 取自
+[folke/tokyonight.nvim](https://github.com/folke/tokyonight.nvim)，
+Graphite 取自一组为纯灰界面调过的值。`accent_custom` 接受六位十六进制色号，
+在任何配色下都优先于名字选择。
+
+| 强调色 | 浅色 | 深色 |
+|---|---|---|
+| **Graphite + 蓝** | <img src="docs/screenshots/zh-CN/accent-graphite-light.png" width="380"> | <img src="docs/screenshots/zh-CN/accent-graphite-dark.png" width="380"> |
+| **Catppuccin Mocha + 木槿紫** | <img src="docs/screenshots/zh-CN/accent-catppuccin-mocha-light.png" width="380"> | <img src="docs/screenshots/zh-CN/accent-catppuccin-mocha-dark.png" width="380"> |
+| **Tokyo Night + 青** | <img src="docs/screenshots/zh-CN/accent-tokyonight-night-light.png" width="380"> | <img src="docs/screenshots/zh-CN/accent-tokyonight-night-dark.png" width="380"> |
+| **Graphite + 自定义 `#e4572e`** | <img src="docs/screenshots/zh-CN/accent-graphite-custom-light.png" width="380"> | <img src="docs/screenshots/zh-CN/accent-graphite-custom-dark.png" width="380"> |
+
+强调色上的文字不写死颜色。Graphite 的八个取值按实测对比度反推压低明度，白字
+稳定达标；Catppuccin 与 Tokyo Night 两端差别大，深色 flavour 的强调色明度在
+0.85 以上，白字只有 1.3:1，因此由 `contrast-color()` 按实际亮度选黑白。
+`checks/contrast.py` 覆盖六套配色 × 八个强调色 × 明暗共 96 种组合，按钮文字
+对按钮底不低于 4.5:1。
+
 ## 设置
 
 [`luci-app-graphite`](https://github.com/Zakkaus/luci-app-graphite) 增加**系统 → Appearance** 页面，写入 `/etc/config/graphite`。
@@ -148,11 +173,17 @@ Catppuccin 的浅色模式使用 Latte，Tokyo Night 使用 Day。切换配色�
 | 选项 | 作用 |
 |---|---|
 | `palette` | 界面使用哪一套表面配色。留空即 Graphite |
+| `accent` | 主按钮、焦点环、活动徽标与品牌方块的颜色。八个名字之一，留空即不启用 |
+| `accent_custom` | 六位十六进制色号。在任何配色下都优先于 `accent` |
 | `tint_hue` | 让所有灰色表面偏向某个色相。取 0 到 360 的色相角，或 `#3b82f6` 这样的颜色码 |
 | `tint_chroma` | 灰色向该色相偏移多少。`0` 为中性；超过 `0.01` 就不再读作灰色，开始与状态色竞争，因此这是上限 |
 
 浅色和深色模式不写入此文件。右上角的三个按钮可选择浅色、深色或跟随系统，
 选择保存在浏览器内。侧边栏是否收成图标条也保存在浏览器内。
+
+侧边栏按分组折叠，载入时只展开当前页所在的一组，点击分组标题可开合，多组可同时
+展开。装了服务类软件包的设备上，菜单可达七组五十九项、内容高 3196px，全部展开时
+一屏放不下。收起图标条时折叠不生效，因为那里没有分组标题可点。
 
 <img src="docs/screenshots/zh-CN/rail-dark.png" width="640">
 

@@ -150,6 +150,33 @@ Two more pages per palette — the realtime graphs and a form-heavy page:
 
 </details>
 
+### Accent
+
+The accent paints the parts that mark the main action and the current location: the
+primary button, the focus ring, the active badge, the brand tile in the sidebar and on
+the login page, and the current item's rail and tint in the sidebar. Everything else
+stays grey. It is off by default, and those parts then use the palette's own neutrals.
+
+Eight names, answered by each palette in its own values, so the accent always belongs
+to the set around it: Catppuccin from each flavour's own accent list, Tokyo Night from
+[folke/tokyonight.nvim](https://github.com/folke/tokyonight.nvim), Graphite from a set
+tuned for a grey interface. `accent_custom` takes a six-digit hex colour and wins over
+the name under any palette.
+
+| Accent | Light | Dark |
+|---|---|---|
+| **Graphite + blue** | <img src="docs/screenshots/en/accent-graphite-light.png" width="380"> | <img src="docs/screenshots/en/accent-graphite-dark.png" width="380"> |
+| **Catppuccin Mocha + mauve** | <img src="docs/screenshots/en/accent-catppuccin-mocha-light.png" width="380"> | <img src="docs/screenshots/en/accent-catppuccin-mocha-dark.png" width="380"> |
+| **Tokyo Night + teal** | <img src="docs/screenshots/en/accent-tokyonight-night-light.png" width="380"> | <img src="docs/screenshots/en/accent-tokyonight-night-dark.png" width="380"> |
+| **Graphite + custom `#e4572e`** | <img src="docs/screenshots/en/accent-graphite-custom-light.png" width="380"> | <img src="docs/screenshots/en/accent-graphite-custom-dark.png" width="380"> |
+
+The text on an accent is not a fixed colour. Graphite's eight values have their lightness
+pushed down from measured contrast so white always clears the floor; Catppuccin and Tokyo
+Night differ too much between their two ends — a dark flavour's accent sits above 0.85 in
+lightness, where white gives 1.3:1 — so `contrast-color()` picks black or white from the
+actual luminance. `checks/contrast.py` covers six palettes by eight accents by light and
+dark, 96 combinations, and holds button text at 4.5:1 against its own fill.
+
 ## Settings
 
 [`luci-app-graphite`](https://github.com/Zakkaus/luci-app-graphite) adds **System → Appearance**, which writes
@@ -159,6 +186,8 @@ browser that opens the device.
 | Option | Effect |
 |---|---|
 | `palette` | Which set of surface colours the interface uses. Empty means Graphite |
+| `accent` | Colour of the primary button, focus ring, active badge and brand tile. One of eight names; empty leaves it off |
+| `accent_custom` | A six-digit hex colour. Wins over `accent` under any palette |
 | `tint_hue` | Biases every grey surface towards one hue. A hue angle from 0 to 360, or a colour code such as `#3b82f6` |
 | `tint_chroma` | How far the greys move towards that hue. `0` is neutral; above `0.01` they stop reading as grey and start competing with the status colours, so that is the ceiling |
 
@@ -166,6 +195,12 @@ Light and dark are not in this file. They belong to the reader, not to the
 device: the three buttons at the top right choose light, dark, or follow the
 system, and the choice is kept in that browser. Collapsing the sidebar to an
 icon rail is kept the same way.
+
+The sidebar collapses by group. On load only the group holding the current page is
+open; a click on a group heading opens or closes it, and several may be open at once.
+On a device with service packages installed the menu reaches seven groups and
+fifty-nine items, 3196px of content, which does not fit one screen fully expanded.
+Collapsing does not apply in the icon rail, where there are no headings to click.
 
 <img src="docs/screenshots/en/rail-dark.png" width="640">
 

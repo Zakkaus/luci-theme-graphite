@@ -2423,3 +2423,16 @@ input:disabled, select:disabled, textarea:disabled {
 
 
 .cbi-dropdown:not([multiple]) { block-size: var(--control-h); }
+
+/* 密页的灰阶分档。量出来的问题是：进程页 935 个带文字的元素里 99% 是同一档，
+   软件包页 527 个里 81%，防火墙规则 164 个里 96%——列与列之间没有任何轻重。
+   三条规则不需要知道每页有几列、哪一列重要：正文走 --content-foreground 的
+   上限档，表头是标签不是数据所以退到次级档，表格里第一列之外的单元格同样退档。
+   参考主题里没有一家做这件事，它们的表格也是通篇一个色。 */
+.shell-content { color: var(--content-foreground); }
+.shell-content .th { color: var(--muted-foreground); }
+
+/* 首列领读。它对绝大多数 LuCI 表格成立（软件包、防火墙、接口、DHCP 的第一列
+   都是那一行的名字），但不是全部：进程页的首列是 PID，真正要读的是「命令」。
+   按语义分列要一页一条规则，那不是这层该有的形状，所以取通例。 */
+.shell-content .tr > .td:not(:first-child) { color: var(--muted-foreground); }
