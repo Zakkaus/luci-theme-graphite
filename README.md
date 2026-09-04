@@ -182,6 +182,14 @@ values, a Catppuccin flavour, Tokyo Night's palette, and a hand-written colour. 
 are switched on the appearance page in
 [luci-app-graphite](https://github.com/Zakkaus/luci-app-graphite).
 
+Progress bars follow the accent too. The figure on a bar is drawn twice: once across the
+track in the body colour, once inside the fill in the accent's own foreground, clipped by
+the fill's overflow, so it changes colour character by character at the boundary. LuCI
+carries that figure only on the outer element's `title`, where the fill cannot reach it,
+so `progressbar-graphite.js` supplies the second copy and keeps it in step with the poll.
+
+<img src="docs/screenshots/en/accent-bars-light.png" width="420"> <img src="docs/screenshots/en/accent-bars-dark.png" width="420">
+
 The text on an accent is not a fixed colour. Graphite's eight values have their lightness
 pushed down from measured contrast so white always clears the floor; Catppuccin and Tokyo
 Night differ too much between their two ends — a dark flavour's accent sits above 0.85 in

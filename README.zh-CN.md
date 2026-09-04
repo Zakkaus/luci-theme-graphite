@@ -169,6 +169,12 @@ Graphite 取自一组为纯灰界面调过的值。`accent_custom` 接受六位�
 Catppuccin 的 flavour、Tokyo Night 的调色板，以及一个自定义色号。切换它们在
 [luci-app-graphite](https://github.com/Zakkaus/luci-app-graphite) 的外观页。
 
+进度条也跟着强调色。条上的数字有两份：一份铺在轨道上用正文色，另一份在填充里用
+强调色算出的前景色，被填充自己的 overflow 裁掉，因此边界处逐字符换色。LuCI 只在外层的 `title` 上给出那串数字，而 CSS 的 `attr()` 只读元素自身的属性，
+因此第二份由 `progressbar-graphite.js` 补出并跟着轮询更新。
+
+<img src="docs/screenshots/zh-CN/accent-bars-light.png" width="420"> <img src="docs/screenshots/zh-CN/accent-bars-dark.png" width="420">
+
 强调色上的文字不写死颜色。Graphite 的八个取值按实测对比度反推压低明度，白字
 稳定达标；Catppuccin 与 Tokyo Night 两端差别大，深色 flavour 的强调色明度在
 0.85 以上，白字只有 1.3:1，因此由 `contrast-color()` 按实际亮度选黑白。

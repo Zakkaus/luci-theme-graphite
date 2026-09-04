@@ -9,7 +9,7 @@
 一个换行的单元格本来就比不换行的高，拿它们当不一致就是误报。
 
 需要一台跑着本主题的设备。用法:
-    uniform.py [基址]        默认 http://127.0.0.1:8080/cgi-bin/luci
+    uniform.py [基址]        默认 http://127.0.0.1:8081/cgi-bin/luci
     PAGES=页面清单.json 可覆盖要扫的页面，默认只扫内置的那几页。
 退出码非零表示同一角色出现了两种取值。
 """
@@ -77,7 +77,7 @@ DEFAULT_PAGES = ["/admin/status/overview", "/admin/system/system",
 
 def main(argv):
     from playwright.sync_api import sync_playwright
-    base = argv[0] if argv else "http://127.0.0.1:8080/cgi-bin/luci"
+    base = argv[0] if argv else "http://127.0.0.1:8081/cgi-bin/luci"
     root = base.rsplit("/cgi-bin/", 1)[0]
     pages = json.load(open(os.environ["PAGES"])) if os.environ.get("PAGES") else DEFAULT_PAGES
     pages = [p for p in pages if "logout" not in p]

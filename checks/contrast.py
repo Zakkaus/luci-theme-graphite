@@ -10,7 +10,7 @@
 import subprocess, sys
 from playwright.sync_api import sync_playwright
 
-B = "http://127.0.0.1:8080/cgi-bin/luci"
+B = "http://127.0.0.1:8081/cgi-bin/luci"
 RSH = ["/scratch/ssd/openwrt-vm/rsh"]
 BODY_MIN, MUTED_MIN, UI_MIN = 10.0, 5.5, 4.5
 ACCENTS = ["pink", "mauve", "red", "peach", "yellow", "green", "teal", "blue"]
@@ -34,6 +34,23 @@ SWEEP = """([palettes, accents]) => {
   // div 而不是 button：luci.css 的基础复位里有 button:not(...):not(...)，
   // 特异度 (0,2,1)，压过把 .cbi-button-apply 列为主按钮的那条 (0,1,0)。
   const host = document.querySelector('.shell-content') || document.body;
+  // 进度条的两份数字：一份铺在轨道上、一份在填充里（由 progressbar-graphite.js 补出，
+  // 见 accents.css 的说明）。两份各自站在不同的底上，因此要各验各的。
+  const bar = () => {
+    const b = document.createElement('div');
+    b.className = 'cbi-progressbar';
+    b.setAttribute('title', 'x');
+    const f = document.createElement('div');
+    f.style.width = '50%';
+    const s = document.createElement('span');
+    s.className = 'bar-ink';
+    s.textContent = 'x';
+    f.appendChild(s); b.appendChild(f); host.appendChild(b);
+    const r = { 填充: ratio(getComputedStyle(s).color, getComputedStyle(f).backgroundColor),
+                轨道: ratio(getComputedStyle(b, '::after').color, getComputedStyle(b).backgroundColor) };
+    b.remove();
+    return r;
+  };
   const probe = () => {
     const d = document.createElement('div');
     d.className = 'cbi-button cbi-button-apply';
@@ -51,9 +68,9 @@ SWEEP = """([palettes, accents]) => {
       root.setAttribute('data-accent', acc);
       for (const scheme of ['light','dark']) {
         root.setAttribute('data-theme', scheme);
-        const c = probe();
+        const c = probe(), bl = bar();
         out.push({配色: pal || 'graphite', 强调色: acc, 明暗: scheme,
-                  比: ratio(c.fg, c.bg)});
+                  比: ratio(c.fg, c.bg), 条填充: bl.填充, 条轨道: bl.轨道});
       }
     }
   }
@@ -165,6 +182,10 @@ try:
             if row['比'] < UI_MIN:
                 bad.append(f"  {row['配色']:22} {row['强调色']:10} {row['明暗']:5} "
                            f"按钮文字 {row['比']} < {UI_MIN}")
+            for 位置 in ('条填充', '条轨道'):
+                if row[位置] < UI_MIN:
+                    bad.append(f"  {row['配色']:22} {row['强调色']:10} {row['明暗']:5} "
+                               f"{位置}上的数字 {row[位置]} < {UI_MIN}")
 
         # 自定义色号。它不走 accents.css 的具名规则，而是由模板写进行内样式，
         # 因此上面那一轮扫不到它——而它恰恰是最容易被压掉的一个：配色在自己的深色
