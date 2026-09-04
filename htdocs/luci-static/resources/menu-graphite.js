@@ -2,6 +2,7 @@
 'require baseclass';
 'require ui';
 'require theme-graphite';
+'require progressbar-graphite';
 
 /* The menu tree, its ACL filtering and its ordering all come from luci-base:
  * ui.menu.load() fetches it, ui.menu.getChildren() drops what this session may

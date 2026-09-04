@@ -182,3 +182,53 @@
   --primary-foreground: oklch(from var(--primary) clamp(0, (0.62 - l) * 1000, 1) 0 0);
   --primary-foreground: contrast-color(var(--primary));
 }
+
+/* 进度条。轨道保持原样，填充是强调色，数字在两段上各取能读的那个黑白。
+
+   数字有两份：外层的 ::after 铺在整条上，用轨道那一侧的颜色；progressbar-graphite.js
+   往填充里补的那一份用填充那一侧的颜色，被填充自己的 overflow 裁掉。两份落在同一个
+   位置，因此边界处逐字符换色，而不是整行换。
+
+   原本这里靠 mix-blend-mode: difference 让一份数字自动换色，那只在无彩填充上成立：
+   填充有色相时白字被反成补色，红底上是青字、粉底上是绿字。
+
+   为什么补的那一份要 JS：那串数字只在外层的 title 上，填充的宽度只在内层的行内样式
+   里，CSS 的 attr() 取不到另一个元素的属性。宽度用 100cqw 从容器查询拿，所以只有文字
+   需要 JS 补。 */
+:root[data-accent] {
+  --bar-fill: var(--primary);
+}
+
+:root[data-accent] .cbi-progressbar { container-type: inline-size; }
+
+:root[data-accent] .cbi-progressbar > div { position: relative; overflow: hidden; }
+
+/* 轨道上那一份。 */
+:root[data-accent] .cbi-progressbar::after {
+  mix-blend-mode: normal;
+  color: var(--content-foreground);
+}
+
+/* 填充里那一份：宽度取外层，位置与上面一致。 */
+:root[data-accent] .cbi-progressbar > div > .bar-ink {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 100cqw;
+  display: grid;
+  place-items: center;
+  color: var(--primary-foreground);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  /* 两份文字落在同一处，靠这一层决定谁在上面。外层的 ::after 在 DOM 顺序上排在
+     填充之后，不写这一行就由它盖住这一份，整条只剩轨道那一侧的颜色。 */
+  z-index: 1;
+}
+
+@media (max-width: 30rem) {
+  :root[data-accent] .cbi-progressbar > div > .bar-ink {
+    place-items: center start;
+    padding-inline: var(--sp-2);
+  }
+}
