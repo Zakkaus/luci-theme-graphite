@@ -50,6 +50,13 @@ function syncAll(root) {
 
 return baseclass.extend({
 	__init__() {
+		/* 没设强调色就一份也不补。定位这一份的 CSS 挂在 :root[data-accent] 下，
+		 * 不设强调色时那些规则不生效，补出来的 span 会变成填充里一段普通的内联
+		 * 文字，数字因此出现两次——v0.4.2 就是这样发出去的。强调色由服务端写在
+		 * 根元素上，一次判断即可。 */
+		if (!document.documentElement.hasAttribute('data-accent'))
+			return;
+
 		syncAll(document);
 
 		/* attributes: LuCI writes the new figure onto title. childList: a

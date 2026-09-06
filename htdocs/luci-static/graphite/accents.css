@@ -209,8 +209,13 @@
   color: var(--content-foreground);
 }
 
+/* 兜底：这一份只在设了强调色时才被定位，任何其他情况下都不该显示。脚本里已经
+   判断过一次，这条挡的是它之后仍然出现在 DOM 里的情形。 */
+.cbi-progressbar .bar-ink { display: none; }
+
 /* 填充里那一份：宽度取外层，位置与上面一致。 */
 :root[data-accent] .cbi-progressbar > div > .bar-ink {
+  display: grid;
   position: absolute;
   inset-block: 0;
   inset-inline-start: 0;
