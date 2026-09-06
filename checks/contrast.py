@@ -208,6 +208,20 @@ try:
                                f"标记底 {got} 不是填入的 {HEX}")
         subprocess.run(RSH + ["uci -q delete graphite.appearance.accent_custom; "
                               "uci commit graphite"], check=True, capture_output=True)
+        # 关掉强调色的那一路。进度条里那份补出来的数字由 progressbar-graphite.js
+        # 写入，而定位它的规则挂在 :root[data-accent] 下：不设强调色时那些规则不
+        # 生效，补出来的 span 会显示成填充里一段普通的内联文字，数字因此出现两次。
+        # 这一路以前没有被渲染过——检查与截图每次都设了强调色——所以它进了 v0.4.2。
+        set_palette("")
+        set_accent("")
+        pg.emulate_media(color_scheme="light")
+        pg.goto(B + "/admin/status/overview", wait_until="networkidle")
+        pg.wait_for_timeout(2000)
+        leaked = pg.evaluate("() => [...document.querySelectorAll("
+                             "'.cbi-progressbar .bar-ink')]"
+                             ".filter(e => e.offsetParent !== null).length")
+        if leaked:
+            bad.append(f"  未设强调色时进度条里露出了 {leaked} 份多余的数字")
         ctx.close()
         set_accent("")
         br.close()
